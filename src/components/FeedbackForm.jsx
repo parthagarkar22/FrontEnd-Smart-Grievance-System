@@ -8,35 +8,42 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
 
   // FeedbackForm.jsx मधील handleSubmit मधील हा भाग रिप्लेस कर:
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  const payload = {
-    grievance: parseInt(grievanceId),
-    officer: typeof officerId === 'object' ? officerId.id : parseInt(officerId),
-    rating: parseInt(rating),
-    comment: comment.trim() || "Resolution satisfied."
-  };
+    // ✅ Debug करण्यासाठी हा लॉग टाकून बघ की officerId मध्ये व्हॅल्यू येतेय का
+    console.log("Current Officer ID:", officerId);
 
-  try {
-    await submitFeedback(payload);
-    alert("Feedback submitted successfully!");
-    if (onSuccess) onSuccess(); 
-  } catch (err) {
-    // Handling the 400 Bad Request error specifically
-    const serverError = err.response?.data;
-    
-    if (serverError?.grievance) {
-      // Since grievance is a OneToOneField, only one feedback is allowed
-      alert("Error: You have already submitted feedback for this grievance!");
-    } else {
-      alert("Submission Failed: Please check your connection or try again later.");
+    const payload = {
+      grievance: parseInt(grievanceId),
+      // ✅ बदल: जर officerId ऑब्जेक्ट असेल तर त्याची .id घे, नाहीतर डायरेक्ट व्हॅल्यू घे
+      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
+      rating: parseInt(rating),
+      comment: comment.trim() || "Resolution satisfied.",
+    };
+
+    // 🚨 जर ऑफिसर आयडी नसेल तर सबमिट करू नको
+    if (!payload.officer) {
+      alert("Error: Officer information is missing. Cannot submit feedback.");
+      setLoading(false);
+      return;
     }
-  } finally {
-    setLoading(false);
-  }
-};
 
+    try {
+      await submitFeedback(payload);
+      alert("Feedback submitted successfully!");
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      const serverError = err.response?.data;
+      if (serverError?.grievance) {
+        alert("Error: You have already submitted feedback for this grievance!");
+      } else {
+        alert("Submission Failed: Please try again later.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-xl max-w-md mx-auto">
       <h3 className="text-xl font-black text-gray-800 mb-2 uppercase tracking-tight">

@@ -209,18 +209,9 @@ export default function AdminDashboard() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+
             {/* ✨ Status Sorting Option */}
-            <select
-              className="border rounded-xl text-sm px-3 py-2 font-bold bg-blue-50 text-blue-600 outline-none shadow-sm"
-              value={sortByStatus}
-              onChange={(e) => setSortByStatus(e.target.value)}
-            >
-              <option value="None">Sort By Status</option>
-              <option value="pending">Show Pending First</option>
-              <option value="in_progress">Show In Progress First</option>
-              <option value="resolved">Show Resolved First</option>
-              <option value="escalated">Show Escalated First</option>
-            </select>
+
             <select
               className="border rounded-xl text-sm px-3 py-2 font-bold bg-white outline-none shadow-sm"
               value={filter}
