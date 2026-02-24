@@ -81,12 +81,20 @@ export default function AdminDashboard() {
       .length,
   };
 
+  // stats data fetch katoy ithe
   const getDeptStats = () => {
     const deptMap = {};
+
+    const officialDepts = ["Light", "Road", "Sewage", "Water", "Garbage"];
+
+    officialDepts.forEach((d) => (deptMap[d] = 0));
+
     complaints.forEach((c) => {
-      const dept = c.department || "General";
-      deptMap[dept] = (deptMap[dept] || 0) + 1;
+      if (officialDepts.includes(c.department)) {
+        deptMap[c.department] += 1;
+      }
     });
+
     return Object.keys(deptMap).map((key) => ({
       name: key,
       count: deptMap[key],
@@ -125,7 +133,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-10 p-6 bg-[#F8FAFC] min-h-screen font-sans">
       <h1 className="text-2xl font-black text-gray-800 tracking-tight uppercase">
-        ADMIN CONSOLE
+        SUPER ADMIN DASHBOARD
       </h1>
 
       {/* --- Section 1: Stats Cards --- */}

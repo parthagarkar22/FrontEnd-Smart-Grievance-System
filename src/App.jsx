@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import MunicipalDashboard from "./pages/MunicipalDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ViewFeedbacks from "./pages/ViewFeedbacks";
+import FeedbackForm from "./components/FeedbackForm";
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
             <Route path="/complaint" element={<ComplaintForm />} />
             <Route path="/my-complaints" element={<MyComplaints />} />
 
-            <Route path="/feedback" element={<UserDashboard />} />
+            <Route path="/feedback" element={<FeedbackForm />} />
             <Route path="/view-feedbacks" element={<ViewFeedbacks />} />
 
             {/* Admin & Officer Routes */}
