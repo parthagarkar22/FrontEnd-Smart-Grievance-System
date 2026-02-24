@@ -14,21 +14,28 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+       
         <Layout>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
+           
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/complaint" element={<ComplaintForm />} />
             <Route path="/my-complaints" element={<MyComplaints />} />
 
+          
+            <Route path="/feedback" element={<UserDashboard />} />
+
+            {/* Admin & Officer Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route
               path="/municipal-dashboard"
               element={<MunicipalDashboard />}
             />
 
+            {/* Default Route */}
             <Route path="/" element={<Login />} />
           </Routes>
         </Layout>

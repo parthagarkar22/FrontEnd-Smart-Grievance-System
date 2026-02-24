@@ -6,21 +6,32 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // FeedbackForm.jsx मधील handleSubmit मधील हा भाग रिप्लेस कर:
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // 🛡️ ४०० एरर फिक्स करण्यासाठी डेटा 'Integer' मध्ये कन्व्हर्ट करणे
+    const payload = {
+      grievance: parseInt(grievanceId), // Grievance ची ID
+      officer:
+        typeof officerId === "object" ? officerId.id : parseInt(officerId), // Officer ची ID
+      rating: parseInt(rating), // Rating 1-5
+      comment: comment.trim() || "Thank you for the resolution.", // Text comment
+    };
+
     try {
-      // तुझ्या फीडबॅक मॉडेलनुसार डेटा पाठवणे
-      await submitFeedback({
-        grievance: grievanceId,
-        officer: officerId,
-        rating: rating,
-        comment: comment,
-      });
+      await submitFeedback(payload);
       alert("Feedback submitted successfully!");
       if (onSuccess) onSuccess();
     } catch (err) {
-      alert("Error: Feedback already submitted or connection issue.");
+      // जर ४०० एरर आला तर सर्वर काय म्हणतोय ते अलर्ट मध्ये दाखवा
+      const serverMsg = err.response?.data;
+      console.log("Validation Error:", serverMsg);
+      alert(
+        serverMsg?.detail ||
+          "You have already submitted feedback for this grievance.",
+      );
     } finally {
       setLoading(false);
     }
