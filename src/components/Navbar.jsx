@@ -50,7 +50,7 @@ export default function Navbar() {
 
   const handleMarkRead = async (id) => {
     try {
-      await markAsRead(id); //
+      await markAsRead(id);
       loadNotifications();
     } catch (err) {
       console.log("Error marking read", err);
@@ -122,7 +122,7 @@ export default function Navbar() {
                   </div>
                 )}
 
-                {/*  Notification Bell - only user can see */}
+                {/* Notification Bell */}
                 {user.role === "CITIZEN" && (
                   <div className="relative notif-dropdown">
                     <button
@@ -141,7 +141,6 @@ export default function Navbar() {
                         </span>
                       )}
                     </button>
-
                     {isNotifOpen && (
                       <div className="absolute right-0 mt-4 w-80 bg-white border border-gray-100 rounded-3xl shadow-2xl py-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="px-6 py-2 border-b border-gray-50 flex justify-between items-center mb-2">
@@ -154,25 +153,16 @@ export default function Navbar() {
                             </span>
                           )}
                         </div>
-
                         <div className="max-h-80 overflow-y-auto px-2 custom-scrollbar">
                           {notifications.length > 0 ? (
                             notifications.map((n) => (
                               <div
                                 key={n.id}
                                 onClick={() => handleMarkRead(n.id)}
-                                className={`p-4 rounded-2xl mb-1 cursor-pointer transition-all ${
-                                  !n.is_read
-                                    ? "bg-blue-50/50 hover:bg-blue-50"
-                                    : "hover:bg-gray-50 opacity-60"
-                                }`}
+                                className={`p-4 rounded-2xl mb-1 cursor-pointer transition-all ${!n.is_read ? "bg-blue-50/50 hover:bg-blue-50" : "hover:bg-gray-50 opacity-60"}`}
                               >
                                 <p
-                                  className={`text-xs leading-relaxed ${
-                                    !n.is_read
-                                      ? "text-slate-800 font-bold"
-                                      : "text-slate-500"
-                                  }`}
+                                  className={`text-xs leading-relaxed ${!n.is_read ? "text-slate-800 font-bold" : "text-slate-500"}`}
                                 >
                                   {n.message}
                                 </p>
@@ -233,22 +223,26 @@ export default function Navbar() {
                           {user.role}
                         </p>
                       </div>
-                      <Link
-                        to="/feedback"
-                        className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition"
-                      >
-                        Give Feedback
-                      </Link>
 
-                      {user &&
-                        (user.role === "ADMIN" || user.role === "OFFICER") && (
-                          <Link
-                            to="/view-feedbacks"
-                            className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition border-b border-gray-50"
-                          >
-                            📊 View Feedbacks
-                          </Link>
-                        )}
+                      {/* ✅ Citizen ला फक्त 'Give Feedback' दिसेल */}
+                      {user.role === "CITIZEN" && (
+                        <Link
+                          to="/feedback"
+                          className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition"
+                        >
+                          Give Feedback
+                        </Link>
+                      )}
+
+                      {/* ✅ दोन्ही Admins ला 'View Feedbacks' दिसेल */}
+                      {(user.role === "ADMIN" || user.role === "OFFICER") && (
+                        <Link
+                          to="/view-feedbacks"
+                          className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition border-b border-gray-50"
+                        >
+                          📊 View Feedbacks
+                        </Link>
+                      )}
 
                       <button
                         onClick={logout}
@@ -303,71 +297,112 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden">
+        <div className="fixed inset-0 z-[999] md:hidden">
+          {/* Full Screen Overlay - Darker for Light Theme Visibility */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#0F172A]/60 backdrop-blur-md transition-opacity duration-300"
             onClick={() => setIsMobileMenuOpen(false)}
           ></div>
-          <div className="fixed right-0 top-0 bottom-0 w-72 bg-white p-6 flex flex-col animate-in slide-in-from-right duration-300">
-            <div className="flex justify-between items-center mb-8 pb-4 border-b">
-              <span className="font-black text-blue-600 tracking-tighter uppercase">
-                MENU
-              </span>
+
+          {/* Right-aligned Full-Height Drawer Panel */}
+          <div className="fixed right-0 top-0 bottom-0 h-full w-[300px] bg-white shadow-[-15px_0_40px_rgba(0,0,0,0.2)] flex flex-col animate-in slide-in-from-right duration-500 ease-out">
+            {/* Header with Dark Blue Text */}
+            <div className="px-6 py-8 flex justify-between items-center border-b border-slate-100 bg-white">
+              <div>
+                <span className="block text-[10px] font-black text-blue-700 uppercase tracking-widest">
+                  Portal Menu
+                </span>
+                <h2 className="text-xl font-black text-[#1E293B] tracking-tight">
+                  Navigation
+                </h2>
+              </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-gray-400 text-3xl"
+                className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl text-[#1E293B] hover:text-red-600 hover:bg-red-50 transition-all"
               >
-                ×
+                <span className="text-2xl leading-none">✕</span>
               </button>
             </div>
-            {user ? (
-              <div className="flex flex-col gap-4">
-                <div className="p-4 bg-blue-50 rounded-2xl">
-                  <p className="text-xs font-black text-blue-400 uppercase">
-                    Signed in as
-                  </p>
-                  <p className="font-black text-gray-800">
-                    {user.first_name} {user.last_name}
-                  </p>
+
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-white">
+              {user ? (
+                <div className="flex flex-col h-full">
+                  {/* Dark Blue Profile Card */}
+                  <div className="p-6 bg-[#1E293B] rounded-[2rem] mb-6 shadow-xl shadow-blue-900/10">
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">
+                      Authorized Session
+                    </p>
+                    <p className="font-black text-white text-lg leading-tight truncate">
+                      {user.first_name} {user.last_name}
+                    </p>
+                    <p className="text-slate-400 text-xs mt-1 truncate font-medium">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  {/* Navigation Links with Dark Blue Text */}
+                  <nav className="flex flex-col gap-1">
+                    <MobileNavLink
+                      to="/user-dashboard"
+                      icon="📊"
+                      label="Dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <MobileNavLink
+                      to="/feedback"
+                      icon="✍️"
+                      label="Give Feedback"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    />
+
+                    {user &&
+                      (user.role === "ADMIN" || user.role === "OFFICER") && (
+                        <div className="mt-4 pt-4 border-t border-slate-100">
+                          <MobileNavLink
+                            to="/view-feedbacks"
+                            icon="📈"
+                            label="Officer Panel"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          />
+                        </div>
+                      )}
+                  </nav>
+
+                  {/* System Logout - Pushed to Bottom */}
+                  <div className="mt-auto pt-6 border-t border-slate-100">
+                    <button
+                      onClick={logout}
+                      className="w-full flex items-center gap-4 px-4 py-4 text-red-600 font-black text-xs uppercase tracking-widest hover:bg-red-50 rounded-2xl transition-all"
+                    >
+                      <span>🚪</span> Log Out System
+                    </button>
+                  </div>
                 </div>
-                <Link
-                  to="/feedback"
-                  className="font-bold text-gray-600 py-2 border-b border-gray-50"
-                >
-                  Give Feedback
-                </Link>
-                {user && (user.role === "ADMIN" || user.role === "OFFICER") && (
+              ) : (
+                <div className="flex flex-col gap-4 pt-4">
                   <Link
-                    to="/view-feedbacks"
-                    className="font-bold text-gray-600 py-2 border-b border-gray-50"
-                    onClick={() => setIsMobileMenuOpen(false)} // क्लिक केल्यावर मेनू बंद होईल
+                    to="/login"
+                    className="py-4 text-center border-2 border-slate-100 rounded-2xl font-black text-[#1E293B] text-sm uppercase tracking-widest transition-all"
                   >
-                    📊 View Feedbacks
+                    Login
                   </Link>
-                )}
-                <button
-                  onClick={logout}
-                  className="text-left font-black text-red-500 mt-4"
-                >
-                  Log Out
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <Link
-                  to="/login"
-                  className="py-3 text-center border rounded-xl font-bold"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="py-3 text-center bg-blue-600 text-white rounded-xl font-bold shadow-lg"
-                >
-                  Register
-                </Link>
-              </div>
-            )}
+                  <Link
+                    to="/register"
+                    className="py-4 text-center bg-blue-700 text-white rounded-2xl font-black shadow-lg shadow-blue-100 text-sm uppercase tracking-widest transition-all"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Branded Tag */}
+            <div className="p-8 text-center bg-slate-50/50">
+              <p className="text-[9px] font-black text-[#1E293B]/40 uppercase tracking-[0.4em]">
+                Muni-Portal • 2026
+              </p>
+            </div>
           </div>
         </div>
       )}
