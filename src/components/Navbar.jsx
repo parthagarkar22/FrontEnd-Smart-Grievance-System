@@ -73,9 +73,9 @@ export default function Navbar() {
           {/* Logo Section */}
           <div className="flex items-center">
             <Link to={getHomeLink()} className="flex items-center gap-2 group">
-              <div className="h-10 w-10 flex items-center justify-center overflow-hidden">
+              <div className="h-12 w-13 flex items-center justify-center overflow-hidden">
                 <img
-                  src="/logo2.png"
+                  src="/mainlogo.png"
                   alt="Logo"
                   className="h-full w-full object-contain bg-transparent"
                 />
@@ -239,6 +239,17 @@ export default function Navbar() {
                       >
                         Give Feedback
                       </Link>
+
+                      {user &&
+                        (user.role === "ADMIN" || user.role === "OFFICER") && (
+                          <Link
+                            to="/view-feedbacks"
+                            className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition border-b border-gray-50"
+                          >
+                            📊 View Feedbacks
+                          </Link>
+                        )}
+
                       <button
                         onClick={logout}
                         className="w-full text-left px-5 py-2.5 text-sm text-red-500 hover:bg-red-50 font-black transition mt-2 flex items-center gap-2"
@@ -325,6 +336,15 @@ export default function Navbar() {
                 >
                   Give Feedback
                 </Link>
+                {user && (user.role === "ADMIN" || user.role === "OFFICER") && (
+                  <Link
+                    to="/view-feedbacks"
+                    className="font-bold text-gray-600 py-2 border-b border-gray-50"
+                    onClick={() => setIsMobileMenuOpen(false)} // क्लिक केल्यावर मेनू बंद होईल
+                  >
+                    📊 View Feedbacks
+                  </Link>
+                )}
                 <button
                   onClick={logout}
                   className="text-left font-black text-red-500 mt-4"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchUserComplaints } from "../services/grievanceService";
-// Graph Sathi import 
+// Graph Sathi import
 import {
   PieChart,
   Pie,
@@ -120,15 +120,18 @@ export default function MyComplaints() {
         </h2>
         <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 flex flex-col items-center">
           {chartData.length > 0 ? (
-            <div className="h-80 w-full max-w-md">
-              <ResponsiveContainer width="100%" height="100%">
+            /* ✅ FIX: Added a fixed height div and min-height to ResponsiveContainer to solve chart error */
+            <div className="h-[350px] w-full max-w-md">
+              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
                 <PieChart>
                   <Pie
                     data={chartData}
-                    innerRadius={80}
-                    outerRadius={120}
+                    innerRadius={70}
+                    outerRadius={100}
                     paddingAngle={5}
                     dataKey="value"
+                    animationBegin={0}
+                    animationDuration={800}
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -143,7 +146,7 @@ export default function MyComplaints() {
               </p>
             </div>
           ) : (
-            <p className="text-slate-400 italic">
+            <p className="text-slate-400 italic py-10">
               No data available for statistics.
             </p>
           )}
