@@ -8,34 +8,34 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
 
   // FeedbackForm.jsx मधील handleSubmit मधील हा भाग रिप्लेस कर:
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    // 🛡️ ४०० एरर फिक्स करण्यासाठी डेटा 'Integer' मध्ये कन्व्हर्ट करणे
-    const payload = {
-      grievance: parseInt(grievanceId), // Grievance ची ID
-      officer:
-        typeof officerId === "object" ? officerId.id : parseInt(officerId), // Officer ची ID
-      rating: parseInt(rating), // Rating 1-5
-      comment: comment.trim() || "Thank you for the resolution.", // Text comment
-    };
-
-    try {
-      await submitFeedback(payload);
-      alert("Feedback submitted successfully!");
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      // जर ४०० एरर आला तर सर्वर काय म्हणतोय ते अलर्ट मध्ये दाखवा
-      const serverMsg = err.response?.data;
-      console.log("Validation Error:", serverMsg);
-      alert(
-        serverMsg?.detail ||
-          "You have already submitted feedback for this grievance.",
-      );
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    grievance: parseInt(grievanceId),
+    officer: typeof officerId === 'object' ? officerId.id : parseInt(officerId),
+    rating: parseInt(rating),
+    comment: comment.trim() || "Resolution satisfied."
   };
+
+  try {
+    await submitFeedback(payload);
+    alert("Feedback submitted successfully!");
+    if (onSuccess) onSuccess(); 
+  } catch (err) {
+    // Handling the 400 Bad Request error specifically
+    const serverError = err.response?.data;
+    
+    if (serverError?.grievance) {
+      // Since grievance is a OneToOneField, only one feedback is allowed
+      alert("Error: You have already submitted feedback for this grievance!");
+    } else {
+      alert("Submission Failed: Please check your connection or try again later.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-xl max-w-md mx-auto">

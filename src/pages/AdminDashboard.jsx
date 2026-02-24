@@ -71,7 +71,9 @@ export default function AdminDashboard() {
   const stats = {
     total: complaints.length,
     awaiting: complaints.filter((c) =>
-      ["pending", "assigned", "in_progress"].includes(c.status?.toLowerCase()),
+      ["pending", "assigned", "in_progress", "escalated"].includes(
+        c.status?.toLowerCase(),
+      ),
     ).length,
     resolved: complaints.filter((c) => c.status?.toLowerCase() === "resolved")
       .length,
@@ -154,12 +156,13 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* --- ✨ Section 2: Department-wise Statistics (New) --- */}
+      {/* --- ✨ Section 2: Department-wise Statistics --- */}
       <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <span>📈</span> Department Performance Overview
         </h2>
-        <div className="h-64 w-full">
+        {/* ✅ FIX: Added a fixed height to the container to solve width(-1) error */}
+        <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={getDeptStats()}>
               <XAxis
@@ -216,6 +219,7 @@ export default function AdminDashboard() {
               <option value="pending">Show Pending First</option>
               <option value="in_progress">Show In Progress First</option>
               <option value="resolved">Show Resolved First</option>
+              <option value="escalated">Show Escalated First</option>
             </select>
             <select
               className="border rounded-xl text-sm px-3 py-2 font-bold bg-white outline-none shadow-sm"
@@ -227,6 +231,7 @@ export default function AdminDashboard() {
               <option value="In Progress">In Progress</option>
               <option value="Resolved">Resolved</option>
               <option value="Rejected">Rejected</option>
+              <option value="Escalated">Escalated</option>
             </select>
           </div>
         </div>
@@ -275,7 +280,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border ${c.status?.includes("resolved") ? "bg-green-50 text-green-700 border-green-100" : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border ${c.status?.includes("resolved") ? "bg-green-50 text-green-700 border-green-100" : c.status?.includes("escalated") ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-blue-50 text-blue-700 border-blue-100"}`}
                       >
                         {c.status?.replace("_", " ")}
                       </span>
@@ -295,6 +300,7 @@ export default function AdminDashboard() {
                         <option value="in_progress">In Progress</option>
                         <option value="resolved">Resolved</option>
                         <option value="rejected">Rejected</option>
+                        <option value="escalated">Escalated</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
