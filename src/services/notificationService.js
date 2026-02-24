@@ -1,23 +1,25 @@
 import API from "./api";
 
-
 export const fetchNotifications = async () => {
-  try {
-    const response = await API.get("notifications/");
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-    throw error;
-  }
+  const response = await API.get("notifications/");
+  return response.data;
+};
+
+export const markAsRead = async (id) => {
+  const response = await API.post(`notifications/mark-read/${id}/`);
+  return response.data;
 };
 
 
-export const markAsRead = async (id) => {
+export const markAllAsReadFront = async (unreadNotifications) => {
   try {
-    const response = await API.post(`notifications/mark-read/${id}/`);
-    return response.data;
+    const promises = unreadNotifications.map((n) =>
+      API.post(`notifications/mark-read/${n.id}/`),
+    );
+    await Promise.all(promises);
+    return { message: "All marked as read" };
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    console.error("Error marking all read", error);
     throw error;
   }
 };

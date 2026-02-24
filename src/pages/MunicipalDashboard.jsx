@@ -8,7 +8,7 @@ import {
 const MunicipalDashboard = () => {
   const { user } = useContext(AuthContext);
   const [complaints, setComplaints] = useState([]);
-  const [feedbacks, setFeedbacks] = useState([]); // ✨ ऑफिसरचे रिव्ह्यू साठवण्यासाठी
+  const [feedbacks, setFeedbacks] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -26,16 +26,31 @@ const MunicipalDashboard = () => {
     try {
       const data = await fetchMunicipalData();
       const allComplaints = data.complaints || [];
-      const officerFeedbacks = data.feedbacks || []; 
+      const officerFeedbacks = data.feedbacks || [];
 
-      // --- 🚀 PRIORITY SORTING ---
+      // --- 🚀 SORTING LOGIC: Status (Pending first) then Priority ---
       const sortedComplaints = [...allComplaints].sort((a, b) => {
+        // १. स्टेटस सॉर्टिंग (Pending तक्रारी सर्वात वर)
+        const statusOrder = {
+          pending: 1,
+          in_progress: 2,
+          resolved: 3,
+          rejected: 4,
+        };
+        const statusA = a.status?.toLowerCase() || "pending";
+        const statusB = b.status?.toLowerCase() || "pending";
+
+        if (statusOrder[statusA] !== statusOrder[statusB]) {
+          return statusOrder[statusA] - statusOrder[statusB];
+        }
+
+        // २. प्रायोरिटी सॉर्टिंग (जर स्टेटस सेम असेल तर)
         const weight = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
         return (weight[b.priority] || 0) - (weight[a.priority] || 0);
       });
 
       setComplaints(sortedComplaints);
-      setFeedbacks(officerFeedbacks); 
+      setFeedbacks(officerFeedbacks);
 
       setStats({
         total: sortedComplaints.length,
@@ -70,7 +85,6 @@ const MunicipalDashboard = () => {
     }
   };
 
-  
   const avgRating =
     feedbacks.length > 0
       ? (
@@ -88,7 +102,6 @@ const MunicipalDashboard = () => {
 
   return (
     <div className="space-y-10 p-4 font-sans bg-gray-50 min-h-screen">
-      {/* Officer Header Section */}
       <div className="bg-white p-6 rounded-2xl border shadow-sm flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-black text-gray-800 tracking-tight uppercase">
@@ -98,7 +111,6 @@ const MunicipalDashboard = () => {
             Officer In-charge: {user?.first_name || user?.username}
           </p>
         </div>
-        {/* ⭐ Officer Average Rating Badge */}
         <div className="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-2xl text-center">
           <p className="text-[10px] font-black text-emerald-600 uppercase">
             My Rating
@@ -107,7 +119,6 @@ const MunicipalDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCard
           title="Total Assigned"
@@ -127,7 +138,6 @@ const MunicipalDashboard = () => {
         <StatCard title="Rejected" value={stats.rejected} color="bg-red-600" />
       </div>
 
-      {/* Complaints List Table */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -204,11 +214,10 @@ const MunicipalDashboard = () => {
                           handleStatusChange(c.id, e.target.value)
                         }
                       >
+                        {/* ✅ REMOVED: Rejected and Assigned options as per user request */}
                         <option value="pending">Pending</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="In Progress">In Progress</option>
+                        <option value="in_progress">In Progress</option>
                         <option value="resolved">Resolved</option>
-                        <option value="rejected">Rejected</option>
                       </select>
                     </td>
                   </tr>
@@ -219,12 +228,10 @@ const MunicipalDashboard = () => {
         </div>
       </div>
 
-      {/* --- ✨ My Ratings & Feedbacks Section --- */}
       <div className="pt-8 border-t border-gray-200">
         <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-6">
           <span>⭐</span> Citizen Feedback On My Service
         </h2>
-
         {feedbacks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {feedbacks.map((f) => (
@@ -263,7 +270,6 @@ const MunicipalDashboard = () => {
   );
 };
 
-/* --- UI Helper Components --- */
 const StatCard = ({ title, value, color }) => (
   <div
     className={`${color} text-white p-6 rounded-3xl shadow-lg transform hover:scale-105 transition-all duration-300`}

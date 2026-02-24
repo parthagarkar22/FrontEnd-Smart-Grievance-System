@@ -6,11 +6,22 @@ import {
 } from "../services/grievanceService";
 import API from "../services/api";
 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+
 export default function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
+  const [sortByStatus, setSortByStatus] = useState("None"); // ✨ Sorting State
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -68,6 +79,18 @@ export default function AdminDashboard() {
       .length,
   };
 
+  const getDeptStats = () => {
+    const deptMap = {};
+    complaints.forEach((c) => {
+      const dept = c.department || "General";
+      deptMap[dept] = (deptMap[dept] || 0) + 1;
+    });
+    return Object.keys(deptMap).map((key) => ({
+      name: key,
+      count: deptMap[key],
+    }));
+  };
+
   const filteredComplaints = complaints
     .filter((c) => {
       const matchesFilter =
@@ -80,6 +103,12 @@ export default function AdminDashboard() {
       );
     })
     .sort((a, b) => {
+      // १. स्टेटस नुसार सॉर्टिंग (User Requirement)
+      if (sortByStatus !== "None") {
+        if (a.status === sortByStatus && b.status !== sortByStatus) return -1;
+        if (a.status !== sortByStatus && b.status === sortByStatus) return 1;
+      }
+      // २. प्रायोरिटी नुसार मूळ सॉर्टिंग
       const weight = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
       return (weight[b.priority] || 0) - (weight[a.priority] || 0);
     });
@@ -97,11 +126,16 @@ export default function AdminDashboard() {
         ADMIN CONSOLE
       </h1>
 
-      {/* --- Section 1: Stats --- */}
+      {/* --- Section 1: Stats Cards --- */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatBox title="Total" value={stats.total} icon="📊" color="blue" />
         <StatBox
-          title="Awaiting"
+          title="Total Reports"
+          value={stats.total}
+          icon="📊"
+          color="blue"
+        />
+        <StatBox
+          title="Active Tasks"
           value={stats.awaiting}
           icon="⏳"
           color="amber"
@@ -120,27 +154,79 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* --- Section 2: Active Grievances Table --- */}
+      {/* --- ✨ Section 2: Department-wise Statistics (New) --- */}
+      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <span>📈</span> Department Performance Overview
+        </h2>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={getDeptStats()}>
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                fontSize={12}
+                fontWeight="bold"
+              />
+              <YAxis hide />
+              <Tooltip
+                cursor={{ fill: "#f1f5f9" }}
+                contentStyle={{
+                  borderRadius: "15px",
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                }}
+              />
+              <Bar dataKey="count" radius={[10, 10, 0, 0]} barSize={40}>
+                {getDeptStats().map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      ["#2563eb", "#f59e0b", "#10b981", "#ef4444"][index % 4]
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* --- Section 3: Active Grievances Table --- */}
       <div className="space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <span>📝</span> Active Grievances List
+            <span>📝</span> Reports Management
           </h2>
-          <div className="flex gap-3 w-full md:w-auto">
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <input
-              placeholder="Search..."
-              className="border rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              placeholder="Search Citizen or ID..."
+              className="border rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm flex-1"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {/* ✨ Status Sorting Option */}
             <select
-              className="border rounded-xl text-sm px-3 py-2 font-bold bg-white outline-none"
+              className="border rounded-xl text-sm px-3 py-2 font-bold bg-blue-50 text-blue-600 outline-none shadow-sm"
+              value={sortByStatus}
+              onChange={(e) => setSortByStatus(e.target.value)}
+            >
+              <option value="None">Sort By Status</option>
+              <option value="pending">Show Pending First</option>
+              <option value="in_progress">Show In Progress First</option>
+              <option value="resolved">Show Resolved First</option>
+            </select>
+            <select
+              className="border rounded-xl text-sm px-3 py-2 font-bold bg-white outline-none shadow-sm"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             >
-              <option value="All">All</option>
+              <option value="All">Filter: All</option>
               <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
               <option value="Resolved">Resolved</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -174,14 +260,15 @@ export default function AdminDashboard() {
                       <a
                         href={c.formatted_address}
                         target="_blank"
+                        rel="noreferrer"
                         className="text-[9px] text-emerald-600 font-black hover:underline uppercase"
                       >
-                        📍 Open Map Location
+                        📍 Open Map
                       </a>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${c.priority === "CRITICAL" ? "bg-red-50 text-red-600 border-red-100 animate-pulse" : "bg-gray-50 text-gray-500 border-gray-100"}`}
+                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${c.priority === "CRITICAL" ? "bg-red-50 text-red-600 border-red-100 animate-pulse" : "bg-gray-50 text-gray-500"}`}
                       >
                         {c.priority}
                       </span>
@@ -202,11 +289,12 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           handleStatusUpdate(c.id, e.target.value)
                         }
-                        className="text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-50"
+                        className="text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none disabled:opacity-50"
                       >
                         <option value="pending">Pending</option>
                         <option value="in_progress">In Progress</option>
                         <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -225,28 +313,27 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* --- Section 3: Separate Feedback & Reviews Section ✨ --- */}
+      {/* --- Section 4: Citizen Feedback & Reviews Section --- */}
       <div className="pt-10 border-t border-gray-200">
         <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-6">
           <span>⭐</span> Citizen Feedbacks & Service Reviews
         </h2>
-
         {feedbacks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {feedbacks.map((f) => (
               <div
                 key={f.id}
-                className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden group"
               >
                 <div className="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 text-[10px] font-black rounded-bl-xl">
                   {f.rating} / 5 ⭐
                 </div>
                 <div className="mb-4">
-                  <p className="text-[10px] font-black text-blue-500 uppercase tracking-tighter mb-1">
-                    Grievance ID: #{f.grievance}
+                  <p className="text-[10px] font-black text-blue-500 uppercase mb-1">
+                    ID: #{f.grievance}
                   </p>
-                  <p className="text-sm text-gray-700 italic leading-relaxed font-medium">
-                    "{f.comment || "No comments shared."}"
+                  <p className="text-sm text-gray-700  font-medium italic">
+                    "{f.comment || "No comments."}"
                   </p>
                 </div>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
@@ -267,9 +354,7 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="bg-white p-12 rounded-3xl border border-dashed border-gray-200 text-center opacity-40">
-            <p className="text-sm font-bold italic">
-              No feedback received from citizens yet.
-            </p>
+            No feedback received.
           </div>
         )}
       </div>
@@ -285,7 +370,9 @@ function StatBox({ title, value, icon, color }) {
     red: "bg-red-600",
   };
   return (
-    <div className={`p-6 rounded-3xl shadow-lg text-white ${styles[color]}`}>
+    <div
+      className={`p-6 rounded-3xl shadow-lg text-white ${styles[color]} transform hover:scale-105 transition-all`}
+    >
       <p className="text-[10px] font-black uppercase opacity-70 tracking-widest">
         {title}
       </p>
