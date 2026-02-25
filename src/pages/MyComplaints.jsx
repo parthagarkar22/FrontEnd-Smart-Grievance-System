@@ -169,8 +169,7 @@ function ComplaintGroup({ title, data, borderColor }) {
                     navigate("/feedback", {
                       state: {
                         grievanceId: c.id,
-                        officerId:
-                          c.assigned_officer || c.officer || c.officer_id,
+                        officerId: c.assigned_to,
                       },
                     })
                   }

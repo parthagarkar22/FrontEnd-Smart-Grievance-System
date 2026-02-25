@@ -20,12 +20,11 @@ const FeedbackForm = ({ onSuccess }) => {
     // ✅ पेलोड तयार करणे - ऑफिसर आयडी आता कंपल्सरी पाठवला आहे
     const payload = {
       grievance: parseInt(grievanceId),
+      // ✅ 'officerId' मध्ये आता 'assigned_to' चा डेटा असेल
+      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
       rating: parseInt(rating),
       comment: comment.trim() || "Resolution satisfied.",
-      // मित्राने सांगितल्याप्रमाणे ही फील्ड आता अनिवार्य आहे
-      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
     };
-
     // 🚨 व्हॅलिडेशन: जर डेटा नसेल तर सबमिट करू नका
     if (!payload.grievance || !payload.officer) {
       alert(
@@ -119,7 +118,7 @@ const FeedbackForm = ({ onSuccess }) => {
 
         <button
           type="submit"
-          disabled={loading || !grievanceId || !officerId}
+          disabled={loading || !grievanceId}
           className="w-full py-5 bg-[#10B981] text-white rounded-[20px] font-black text-xs hover:bg-[#059669] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 uppercase tracking-[0.2em]"
         >
           {loading ? "Syncing with Server..." : "Submit Experience →"}
