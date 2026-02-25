@@ -6,6 +6,7 @@ const FeedbackForm = ({ onSuccess }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // state मधून डेटा रिसीव्ह करणे
   const { grievanceId, officerId } = location.state || {};
 
   const [rating, setRating] = useState(5);
@@ -16,46 +17,50 @@ const FeedbackForm = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
 
-    // ✅ Debug करण्यासाठी लॉग
-    console.log(
-      "Received IDs from State - Grievance:",
-      grievanceId,
-      "Officer:",
-      officerId,
-    );
+    // ✅ Debug: कन्सोलमध्ये व्हॅल्यू चेक करा
+    console.log("Submitting Feedback - Grievance ID:", grievanceId);
 
     const payload = {
       grievance: parseInt(grievanceId),
-      // ✅ बदल: जर officerId ऑब्जेक्ट असेल तर त्याची .id घे, नाहीतर डायरेक्ट व्हॅल्यू घे
-      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
       rating: parseInt(rating),
       comment: comment.trim() || "Resolution satisfied.",
+      // ✅ आपण बॅकएंड अपडेट केल्यामुळे आता 'officer' पाठवणे अनिवार्य नाही,
+      // तरीही सुरक्षेसाठी आपण तो पाठवूया जर उपलब्ध असेल तर.
+      officer: officerId?.id
+        ? parseInt(officerId.id)
+        : officerId
+          ? parseInt(officerId)
+          : null,
     };
 
-    // 🚨 जर ऑफिसर आयडी नसेल तर सबमिट करण्याऐवजी मेसेज दाखवा
-    if (!payload.officer) {
+    // 🚨 व्हॅलिडेशन: तक्रार आयडी असणे सर्वात महत्त्वाचे आहे
+    if (!payload.grievance) {
       alert(
-        "Error: Officer information is missing. Please go back to My History and try again.",
+        "Error: Grievance ID is missing. Please try again from My History.",
       );
       setLoading(false);
       return;
     }
 
     try {
+      // ✅ आता बॅकएंड स्वतः 'officer' शोधून सेव्ह करेल
       await submitFeedback(payload);
       alert("Feedback submitted successfully!");
 
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate("/user-dashboard"); // सबमिट झाल्यावर डॅशबोर्डवर पाठवा
+        navigate("/user-dashboard"); // यशस्वी सबमिशननंतर डॅशबोर्डवर नेव्हिगेट करा
       }
     } catch (err) {
       const serverError = err.response?.data;
       if (serverError?.grievance) {
         alert("Error: You have already submitted feedback for this grievance!");
       } else {
-        alert("Submission Failed: Please try again later.");
+        // बॅकएंडमधील नेमका एरर मेसेज दाखवा
+        alert(
+          serverError?.error || "Submission Failed: Please try again later.",
+        );
       }
     } finally {
       setLoading(false);

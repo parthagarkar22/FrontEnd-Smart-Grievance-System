@@ -47,7 +47,9 @@ export default function ViewFeedbacks() {
                 <td className="px-6 py-4 font-bold text-blue-600">
                   #{f.grievance}
                 </td>
-                <td className="px-6 py-4 text-emerald-600 font-black">
+                <td
+                  className={`px-6 py-4 font-black ${f.rating >= 4 ? "text-emerald-600" : f.rating <= 2 ? "text-red-500" : "text-amber-500"}`}
+                >
                   {f.rating} / 5 ⭐
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-600 italic font-medium">
