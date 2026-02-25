@@ -196,28 +196,46 @@ const MunicipalDashboard = () => {
                     >
                       {c.description || "No details provided"}
                     </td>
+
                     <td className="p-5 text-center">
                       <StatusBadge status={c.status} />
                     </td>
+
                     <td className="p-5">
                       <select
                         disabled={c.status?.toLowerCase() === "resolved"}
-                        className={`border rounded-lg text-xs p-2 font-bold outline-none transition-all ${
-                          c.status?.toLowerCase() === "resolved"
-                            ? "bg-gray-100 cursor-not-allowed opacity-50"
-                            : "bg-white focus:ring-2 focus:ring-blue-500"
+                        className={` rounded-lg text-xs p-2 font-black outline-none transition-all border-2 ${
+                          c.status === "resolved"
+                            ? "bg-green-50 text-green-700 border-green-200 cursor-not-allowed opacity-70"
+                            : c.status === "in_progress"
+                              ? "bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-500"
+                              : "bg-blue-50 text-blue-700 border-blue-200 focus:ring-blue-500" // For Pending
                         }`}
                         value={
-                          c.status === "in_progress" ? "In Progress" : c.status
+                          c.status === "in_progress" ? "in_progress" : c.status
                         }
                         onChange={(e) =>
                           handleStatusChange(c.id, e.target.value)
                         }
                       >
-                        {/* ✅ REMOVED: Rejected and Assigned options as per user request */}
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
+                        <option
+                          value="pending"
+                          className="bg-white text-blue-700 font-bold"
+                        >
+                          ⏳ Pending
+                        </option>
+                        <option
+                          value="in_progress"
+                          className="bg-white text-amber-700 font-bold"
+                        >
+                          🏗️ In Progress
+                        </option>
+                        <option
+                          value="resolved"
+                          className="bg-white text-green-700 font-bold"
+                        >
+                          ✅ Resolved
+                        </option>
                       </select>
                     </td>
                   </tr>

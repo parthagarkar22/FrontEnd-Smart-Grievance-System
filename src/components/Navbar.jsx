@@ -224,16 +224,6 @@ export default function Navbar() {
                         </p>
                       </div>
 
-                      {/* ✅ Citizen ला फक्त 'Give Feedback' दिसेल */}
-                      {user.role === "CITIZEN" && (
-                        <Link
-                          to="/feedback"
-                          className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 font-bold transition"
-                        >
-                          Give Feedback
-                        </Link>
-                      )}
-
                       {/* ✅ दोन्ही Admins ला 'View Feedbacks' दिसेल */}
                       {(user.role === "ADMIN" || user.role === "OFFICER") && (
                         <Link
@@ -347,12 +337,6 @@ export default function Navbar() {
                       to="/user-dashboard"
                       icon="📊"
                       label="Dashboard"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    />
-                    <MobileNavLink
-                      to="/feedback"
-                      icon="✍️"
-                      label="Give Feedback"
                       onClick={() => setIsMobileMenuOpen(false)}
                     />
 
