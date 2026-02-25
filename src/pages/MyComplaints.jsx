@@ -15,7 +15,7 @@ export default function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  
+  const navigate = useNavigate(); // ✅ हे फंक्शनच्या आत हवे
 
   useEffect(() => {
     loadData();
@@ -50,12 +50,12 @@ export default function MyComplaints() {
     rejected: filtered.filter((c) => c.status?.toLowerCase() === "rejected"),
   };
 
-  // --- 📊 Statistics Data for PieChart ---
+  // ✅ १. हा chartData व्हेरिएबल इथे हवा, तरच बटण काम करेल
   const chartData = [
-    { name: "Pending", value: grouped.pending.length, color: "#3B82F6" }, // Blue
-    { name: "In Progress", value: grouped.inProgress.length, color: "#F59E0B" }, // Amber
-    { name: "Resolved", value: grouped.resolved.length, color: "#10B981" }, // Green
-    { name: "Rejected", value: grouped.rejected.length, color: "#EF4444" }, // Red
+    { name: "Pending", value: grouped.pending.length, color: "#3B82F6" },
+    { name: "In Progress", value: grouped.inProgress.length, color: "#F59E0B" },
+    { name: "Resolved", value: grouped.resolved.length, color: "#10B981" },
+    { name: "Rejected", value: grouped.rejected.length, color: "#EF4444" },
   ].filter((item) => item.value > 0);
 
   if (loading)
@@ -86,28 +86,21 @@ export default function MyComplaints() {
       </div>
 
       <div className="space-y-12">
-        {/* --- Section: Pending --- */}
         <ComplaintGroup
           title="🕒 Pending / New"
           data={grouped.pending}
           borderColor="border-l-blue-500"
         />
-
-        {/* --- Section: In Progress --- */}
         <ComplaintGroup
           title="⏳ In Progress"
           data={grouped.inProgress}
           borderColor="border-l-amber-500"
         />
-
-        {/* --- Section: Resolved --- */}
         <ComplaintGroup
           title="✅ Resolved Issues"
           data={grouped.resolved}
           borderColor="border-l-emerald-500"
         />
-
-        {/* --- Section: Rejected --- */}
         <ComplaintGroup
           title="🚫 Rejected"
           data={grouped.rejected}
@@ -115,44 +108,17 @@ export default function MyComplaints() {
         />
       </div>
 
-      {/* --- 📈 Graphical Representation Section (At the Bottom) --- */}
-      <div className="mt-20 pt-10 border-t border-slate-200">
-        <h2 className="text-xl font-black text-[#0F2A44] text-center mb-8 uppercase tracking-widest">
-          Grievance Overview Statistics
-        </h2>
-        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 flex flex-col items-center">
-          {chartData.length > 0 ? (
-            /* ✅ FIX: Added a fixed height div and min-height to ResponsiveContainer to solve chart error */
-            <div className="h-[350px] w-full max-w-md">
-              <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={36} />
-                </PieChart>
-              </ResponsiveContainer>
-              <p className="text-center text-xs font-bold text-slate-400 mt-4 uppercase">
-                Total Distribution of Complaints
-              </p>
-            </div>
-          ) : (
-            <p className="text-slate-400 italic py-10">
-              No data available for statistics.
-            </p>
-          )}
-        </div>
+      {/* ✅ २. ॲनालिटिक्स बटण आता 'return' च्या आत आणि तळाशी आहे */}
+      <div className="mt-20 py-10 border-t border-slate-200 flex justify-center">
+        <button
+          onClick={() => navigate("/analytics", { state: { chartData } })}
+          className="group relative bg-[#0F2A44] text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-4"
+        >
+          <span>📊 View Detailed Analytics Report</span>
+          <span className="group-hover:translate-x-2 transition-transform">
+            →
+          </span>
+        </button>
       </div>
     </div>
   );
@@ -203,7 +169,8 @@ function ComplaintGroup({ title, data, borderColor }) {
                     navigate("/feedback", {
                       state: {
                         grievanceId: c.id,
-                        officerId: c.assigned_officer,
+                        officerId:
+                          c.assigned_officer || c.officer || c.officer_id,
                       },
                     })
                   }

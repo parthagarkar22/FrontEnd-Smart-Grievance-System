@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // ✅ useNavigate ॲड केले आहे
 import { AuthContext } from "../context/AuthContext";
 import { fetchUserComplaints } from "../services/grievanceService";
 import ChatBot from "../components/ChatBot";
 
 const UserDashboard = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate(); // ✅ navigate इनिशियलाइज केले
   const [complaints, setComplaints] = useState([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0 });
   const [loading, setLoading] = useState(true);
@@ -18,16 +19,17 @@ const UserDashboard = () => {
     setLoading(true);
     try {
       const data = await fetchUserComplaints();
-      setComplaints(data || []);
+      const complaintsData = data || [];
+      setComplaints(complaintsData);
 
       // Calculate stats
-      const total = data.length;
-      const pending = data.filter((c) =>
+      const total = complaintsData.length;
+      const pending = complaintsData.filter((c) =>
         ["pending", "assigned", "in_progress", "in progress"].includes(
           c.status?.toLowerCase(),
         ),
       ).length;
-      const resolved = data.filter(
+      const resolved = complaintsData.filter(
         (c) => c.status?.toLowerCase() === "resolved",
       ).length;
 
@@ -38,6 +40,13 @@ const UserDashboard = () => {
       setLoading(false);
     }
   };
+
+  // ✅ १. Analytics साठी chartData लॉजिक
+  const chartData = [
+    { name: "Total", value: stats.total, color: "#3B82F6" },
+    { name: "In Progress", value: stats.pending, color: "#F59E0B" },
+    { name: "Resolved", value: stats.resolved, color: "#10B981" },
+  ].filter((item) => item.value > 0);
 
   if (loading)
     return (
@@ -69,7 +78,9 @@ const UserDashboard = () => {
           </div>
 
           {/* --- Stats Cards --- */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            {" "}
+            {/* Margin कमी केली */}
             <StatCard
               title="All Reports"
               value={stats.total}
@@ -88,6 +99,17 @@ const UserDashboard = () => {
               icon="✅"
               color="emerald"
             />
+          </div>
+
+          {/* ✅ २. Analytics Button - Stats Cards च्या खाली */}
+          <div className="mb-12 flex justify-center">
+            <button
+              onClick={() => navigate("/analytics", { state: { chartData } })}
+              className="w-full bg-slate-800 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-3"
+            >
+              <span>📊 View Detailed Analytics Report</span>
+              <span className="text-lg">→</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -148,7 +170,6 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* Floating Chatbot */}
       <ChatBot />
     </>
   );

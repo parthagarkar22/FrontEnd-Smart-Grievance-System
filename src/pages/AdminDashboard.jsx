@@ -242,6 +242,7 @@ export default function AdminDashboard() {
                 <tr>
                   <th className="px-6 py-5">ID</th>
                   <th className="px-6 py-5">Citizen & Location</th>
+                  <th className="px-6 py-5">Department</th>
                   <th className="px-6 py-5 text-center">Priority</th>
                   <th className="p-5">Description</th>
                   <th className="px-6 py-5 text-center">Status</th>
@@ -270,6 +271,11 @@ export default function AdminDashboard() {
                       >
                         📍 Open Map
                       </a>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase border border-blue-100">
+                        {c.department || "General"}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span

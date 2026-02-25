@@ -11,6 +11,7 @@ import MunicipalDashboard from "./pages/MunicipalDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import ViewFeedbacks from "./pages/ViewFeedbacks";
 import FeedbackForm from "./components/FeedbackForm";
+import Analytics from "./pages/Analytics";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
 
             <Route path="/feedback" element={<FeedbackForm />} />
             <Route path="/view-feedbacks" element={<ViewFeedbacks />} />
+            <Route path="/analytics" element={<Analytics />} />
 
             {/* Admin & Officer Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
