@@ -41,12 +41,30 @@ const UserDashboard = () => {
     }
   };
 
-  // ✅ १. Analytics साठी chartData लॉजिक
+  // ✅ सर्व स्टेटस दिसण्यासाठी अपडेटेड chartData
   const chartData = [
-    { name: "Total", value: stats.total, color: "#3B82F6" },
-    { name: "In Progress", value: stats.pending, color: "#F59E0B" },
-    { name: "Resolved", value: stats.resolved, color: "#10B981" },
-  ].filter((item) => item.value > 0);
+    { name: "Total", value: stats.total, color: "#64748B" }, // Slate
+    {
+      name: "Pending",
+      value: complaints.filter((c) => c.status?.toLowerCase() === "pending")
+        .length,
+      color: "#3B82F6",
+    }, // Blue
+    {
+      name: "In Progress",
+      value: complaints.filter((c) => c.status?.toLowerCase() === "in_progress")
+        .length,
+      color: "#F59E0B",
+    }, // Amber
+    { name: "Resolved", value: stats.resolved, color: "#10B981" }, // Green
+    { name: "Rejected", value: stats.rejected, color: "#EF4444" }, // Red
+    {
+      name: "Escalated",
+      value: complaints.filter((c) => c.status?.toLowerCase() === "escalated")
+        .length,
+      color: "#8B5CF6",
+    }, // Purple
+  ].filter((item) => item.value > 0); // only those can see who has above 0 value
 
   if (loading)
     return (
@@ -102,13 +120,12 @@ const UserDashboard = () => {
           </div>
 
           {/* ✅ २. Analytics Button - Stats Cards च्या खाली */}
-          <div className="mb-12 flex justify-center">
+          <div className="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-50">
             <button
               onClick={() => navigate("/analytics", { state: { chartData } })}
-              className="w-full bg-slate-800 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-3"
+              className="w-full max-w-md bg-slate-900/90 backdrop-blur-md text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl border border-white/10"
             >
-              <span>📊 View Detailed Analytics Report</span>
-              <span className="text-lg">→</span>
+              📊 Open Analytics Report →
             </button>
           </div>
 
