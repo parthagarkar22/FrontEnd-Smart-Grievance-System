@@ -20,8 +20,12 @@ const FeedbackForm = ({ onSuccess }) => {
     // ✅ पेलोड तयार करणे - ऑफिसर आयडी आता कंपल्सरी पाठवला आहे
     const payload = {
       grievance: parseInt(grievanceId),
-      // ✅ 'officerId' मध्ये आता 'assigned_to' चा डेटा असेल
-      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
+      // ✅ सुरक्षितता: जर officerId नसेल तर त्याला 1 असाइन करा
+      officer: officerId
+        ? officerId.id
+          ? parseInt(officerId.id)
+          : parseInt(officerId)
+        : 1,
       rating: parseInt(rating),
       comment: comment.trim() || "Resolution satisfied.",
     };
