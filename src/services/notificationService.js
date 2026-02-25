@@ -6,16 +6,16 @@ export const fetchNotifications = async () => {
 };
 
 export const markAsRead = async (id) => {
-  const response = await API.post(`notifications/mark-read/${id}/`);
+  const response = await API.post(`notifications/${id}/read/`);
   return response.data;
 };
-
 
 export const markAllAsReadFront = async (unreadNotifications) => {
   try {
     const promises = unreadNotifications.map((n) =>
-      API.post(`notifications/mark-read/${n.id}/`),
+      API.post(`notifications/${n.id}/read/`)
     );
+
     await Promise.all(promises);
     return { message: "All marked as read" };
   } catch (error) {
