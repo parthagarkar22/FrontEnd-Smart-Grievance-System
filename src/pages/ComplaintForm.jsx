@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 const ComplaintForm = () => {
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ const ComplaintForm = () => {
     location: null,
   });
 
-  // Handle Image Change & Preview
+  // ---------------- IMAGE ----------------
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -26,6 +29,7 @@ const ComplaintForm = () => {
     }
   };
 
+  // ---------------- GPS ----------------
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -43,37 +47,37 @@ const ComplaintForm = () => {
     }
   }, []);
 
+  // ---------------- SUBMIT ----------------
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Mandatory checks to prevent Backend "400 Bad Request" errors
     if (!image) return alert("Please upload a photo of the issue.");
     if (!formData.location)
       return alert("Waiting for location. Please wait a moment.");
 
     setIsSubmitting(true);
 
-    // Constructing FormData exactly how Django expects it
     const data = new FormData();
     data.append("title", formData.title.trim());
     data.append("description", formData.description.trim());
     data.append("image", image);
     data.append("latitude", formData.location.lat);
     data.append("longitude", formData.location.lng);
-    const token = localStorage.getItem("access")
+
+    const token = localStorage.getItem("access");
+
     try {
       await axios.post(API_URL, data, {
         headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,  // ✅ Bearer added
-      },
-
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       setIsSuccess(true);
       setTimeout(() => navigate("/user-dashboard"), 2000);
     } catch (error) {
       console.error("Backend Error Details:", error.response?.data);
-      // Alerts the specific field error sent by Django
       const errorMsg = error.response?.data
         ? Object.entries(error.response.data)
             .map(([key, val]) => `${key}: ${val}`)
@@ -84,6 +88,44 @@ const ComplaintForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  // ---------------- VOICE FEATURE ----------------
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
+  const startListening = () => {
+    resetTranscript(); // clear old voice text
+
+    SpeechRecognition.startListening({
+      continuous: false, // ✅ IMPORTANT CHANGE
+      language: "en-IN",
+    });
+  };
+
+  const handleVoiceFill = () => {
+    if (!transcript) return alert("No voice detected.");
+
+    setFormData((prev) => ({
+      ...prev,
+      description: transcript,
+      title: transcript.split(" ").slice(0, 5).join(" "),
+    }));
+
+    SpeechRecognition.stopListening(); // stop mic safely
+    resetTranscript();
+  };
+
+  if (!browserSupportsSpeechRecognition) {
+    return (
+      <div className="p-10 text-center">
+        Your browser does not support speech recognition.
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (
@@ -110,7 +152,6 @@ const ComplaintForm = () => {
             Fill in the details below
           </p>
 
-          {/* Location Badge */}
           <div
             className={`absolute top-8 right-6 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border transition-all ${
               formData.location
@@ -132,6 +173,7 @@ const ComplaintForm = () => {
               type="text"
               placeholder="What is the problem?"
               required
+              value={formData.title}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400"
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
@@ -140,18 +182,47 @@ const ComplaintForm = () => {
           </div>
 
           {/* Detailed Description */}
-          <div className="group">
-            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
-              Description
-            </label>
+          <div className="group relative">
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                Description
+              </label>
+
+              <button
+                type="button"
+                onClick={startListening}
+                className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full transition-all ${
+                  listening
+                    ? "bg-red-100 text-red-600 animate-pulse"
+                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                }`}
+              >
+                🎤 {listening ? "Listening..." : "Speak"}
+              </button>
+            </div>
+
             <textarea
               placeholder="Describe what you see..."
               required
+              value={formData.description}
               className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 resize-none"
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData({
+                  ...formData,
+                  description: e.target.value,
+                })
               }
             />
+
+            {transcript && (
+              <button
+                type="button"
+                onClick={handleVoiceFill}
+                className="text-xs text-green-600 mt-2 hover:underline"
+              >
+                Use Voice Text
+              </button>
+            )}
           </div>
 
           {/* Photo Evidence */}
@@ -185,7 +256,7 @@ const ComplaintForm = () => {
             </div>
           </div>
 
-          {/* Action Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting || !formData.location}

@@ -53,10 +53,9 @@ export const updateComplaintStatus = async (id, status) => {
   }
 };
 
-
 export const fetchAllFeedbacks = async () => {
   try {
-    const response = await API.get("feedback/"); 
+    const response = await API.get("feedback/all/");
     return response.data;
   } catch (error) {
     console.error("Error fetching feedbacks:", error);
