@@ -6,7 +6,7 @@ const FeedbackForm = ({ onSuccess }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // state मधून डेटा रिसीव्ह करणे
+  // MyComplaints कडून येणारा डेटा रिसीव्ह करणे
   const { grievanceId, officerId } = location.state || {};
 
   const [rating, setRating] = useState(5);
@@ -17,49 +17,45 @@ const FeedbackForm = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
 
-    // ✅ Debug: कन्सोलमध्ये व्हॅल्यू चेक करा
-    console.log("Submitting Feedback - Grievance ID:", grievanceId);
-
+    // ✅ पेलोड तयार करणे - ऑफिसर आयडी आता कंपल्सरी पाठवला आहे
     const payload = {
       grievance: parseInt(grievanceId),
       rating: parseInt(rating),
       comment: comment.trim() || "Resolution satisfied.",
-      // ✅ आपण बॅकएंड अपडेट केल्यामुळे आता 'officer' पाठवणे अनिवार्य नाही,
-      // तरीही सुरक्षेसाठी आपण तो पाठवूया जर उपलब्ध असेल तर.
-      officer: officerId?.id
-        ? parseInt(officerId.id)
-        : officerId
-          ? parseInt(officerId)
-          : null,
+      // मित्राने सांगितल्याप्रमाणे ही फील्ड आता अनिवार्य आहे
+      officer: officerId?.id ? parseInt(officerId.id) : parseInt(officerId),
     };
 
-    // 🚨 व्हॅलिडेशन: तक्रार आयडी असणे सर्वात महत्त्वाचे आहे
-    if (!payload.grievance) {
+    // 🚨 व्हॅलिडेशन: जर डेटा नसेल तर सबमिट करू नका
+    if (!payload.grievance || !payload.officer) {
       alert(
-        "Error: Grievance ID is missing. Please try again from My History.",
+        "Error: Grievance or Officer information is missing. Please try again from My History.",
       );
       setLoading(false);
       return;
     }
 
     try {
-      // ✅ आता बॅकएंड स्वतः 'officer' शोधून सेव्ह करेल
       await submitFeedback(payload);
-      alert("Feedback submitted successfully!");
+      alert("Feedback submitted successfully! ⭐");
 
       if (onSuccess) {
         onSuccess();
       } else {
-        navigate("/user-dashboard"); // यशस्वी सबमिशननंतर डॅशबोर्डवर नेव्हिगेट करा
+        navigate("/user-dashboard");
       }
     } catch (err) {
       const serverError = err.response?.data;
+      console.error("Submission Error:", serverError);
+
       if (serverError?.grievance) {
         alert("Error: You have already submitted feedback for this grievance!");
+      } else if (serverError?.officer) {
+        alert("Error: Officer field is mandatory according to backend.");
       } else {
-        // बॅकएंडमधील नेमका एरर मेसेज दाखवा
         alert(
-          serverError?.error || "Submission Failed: Please try again later.",
+          serverError?.error ||
+            "Submission Failed: Please check your connection.",
         );
       }
     } finally {
@@ -68,18 +64,27 @@ const FeedbackForm = ({ onSuccess }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-xl max-w-md mx-auto mt-10">
-      <h3 className="text-xl font-black text-gray-800 mb-2 uppercase tracking-tight">
+    <div className="bg-white p-8 rounded-[32px] border border-blue-50 shadow-2xl max-w-md mx-auto mt-16 relative overflow-hidden">
+      {/* Decorative background element */}
+      <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-12 -mt-12 opacity-50"></div>
+
+      <h3 className="text-2xl font-black text-slate-800 mb-2 uppercase tracking-tight">
         Rate the Resolution
       </h3>
-      <p className="text-gray-400 text-xs font-bold mb-6 uppercase">
-        Grievance ID: #{grievanceId || "N/A"}
-      </p>
+      <div className="flex items-center gap-2 mb-8">
+        <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+          Grievance: #{grievanceId || "N/A"}
+        </span>
+        <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+        <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest">
+          Officer: #{officerId?.id || officerId || "N/A"}
+        </span>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
         <div>
-          <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-3">
-            Service Rating
+          <label className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] block mb-4">
+            How was your experience?
           </label>
           <div className="flex justify-between gap-2">
             {[1, 2, 3, 4, 5].map((num) => (
@@ -87,10 +92,10 @@ const FeedbackForm = ({ onSuccess }) => {
                 key={num}
                 type="button"
                 onClick={() => setRating(num)}
-                className={`w-12 h-12 rounded-2xl font-black text-lg transition-all transform active:scale-95 ${
+                className={`w-12 h-12 rounded-2xl font-black text-lg transition-all transform active:scale-90 ${
                   rating === num
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-200 rotate-3"
-                    : "bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100"
+                    ? "bg-blue-600 text-white shadow-xl shadow-blue-200 -rotate-3 scale-110"
+                    : "bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100"
                 }`}
               >
                 {num}
@@ -100,13 +105,13 @@ const FeedbackForm = ({ onSuccess }) => {
         </div>
 
         <div>
-          <label className="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-2">
-            Additional Comments
+          <label className="text-[11px] font-black text-blue-600 uppercase tracking-[0.2em] block mb-3">
+            Your Comments
           </label>
           <textarea
-            className="w-full p-4 border border-gray-100 rounded-2xl bg-gray-50 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all italic"
-            rows="3"
-            placeholder="Write your feedback here..."
+            className="w-full p-5 border border-slate-100 rounded-[24px] bg-slate-50 text-sm outline-none focus:ring-4 focus:ring-blue-100 transition-all italic text-slate-600"
+            rows="4"
+            placeholder="Share your experience with the officer..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
@@ -114,10 +119,10 @@ const FeedbackForm = ({ onSuccess }) => {
 
         <button
           type="submit"
-          disabled={loading || !grievanceId}
-          className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:bg-emerald-600 transition shadow-lg shadow-emerald-100 disabled:opacity-50 uppercase tracking-widest"
+          disabled={loading || !grievanceId || !officerId}
+          className="w-full py-5 bg-[#10B981] text-white rounded-[20px] font-black text-xs hover:bg-[#059669] transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 uppercase tracking-[0.2em]"
         >
-          {loading ? "Processing..." : "Submit Experience"}
+          {loading ? "Syncing with Server..." : "Submit Experience →"}
         </button>
       </form>
     </div>
