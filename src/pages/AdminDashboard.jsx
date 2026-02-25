@@ -243,6 +243,7 @@ export default function AdminDashboard() {
                   <th className="px-6 py-5">ID</th>
                   <th className="px-6 py-5">Citizen & Location</th>
                   <th className="px-6 py-5 text-center">Priority</th>
+                  <th className="p-5">Description</th>
                   <th className="px-6 py-5 text-center">Status</th>
                   <th className="px-6 py-5">Manage</th>
                   <th className="px-6 py-5 text-center">Action</th>
@@ -272,14 +273,40 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${c.priority === "CRITICAL" ? "bg-red-50 text-red-600 border-red-100 animate-pulse" : "bg-gray-50 text-gray-500"}`}
+                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${
+                          c.priority === "CRITICAL" || c.priority === "HIGH"
+                            ? "bg-red-50 text-red-600 border-red-100 animate-pulse"
+                            : c.priority === "MEDIUM"
+                              ? "bg-amber-50 text-amber-600 border-amber-100"
+                              : c.priority === "LOW"
+                                ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                : "bg-gray-50 text-gray-500 border-gray-100"
+                        }`}
                       >
                         {c.priority}
                       </span>
                     </td>
+
+                    <td
+                      className="p-5 text-gray-600 text-xs max-w-xs truncate"
+                      title={c.description}
+                    >
+                      {c.description || "No details provided"}
+                    </td>
+
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border ${c.status?.includes("resolved") ? "bg-green-50 text-green-700 border-green-100" : c.status?.includes("escalated") ? "bg-purple-50 text-purple-700 border-purple-100" : "bg-blue-50 text-blue-700 border-blue-100"}`}
+                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border transition-all ${
+                          c.status?.includes("resolved")
+                            ? "bg-green-50 text-green-700 border-green-100"
+                            : c.status?.includes("rejected")
+                              ? "bg-red-50 text-red-700 border-red-100"
+                              : c.status?.includes("escalated")
+                                ? "bg-purple-50 text-purple-700 border-purple-100"
+                                : c.status?.includes("in_progress")
+                                  ? "bg-amber-50 text-amber-700 border-amber-100"
+                                  : "bg-blue-50 text-blue-700 border-blue-100" // For 'pending'
+                        }`}
                       >
                         {c.status?.replace("_", " ")}
                       </span>
@@ -288,18 +315,51 @@ export default function AdminDashboard() {
                       <select
                         disabled={c.status === "resolved"}
                         value={
-                          c.status === "in_progress" ? "In Progress" : c.status
+                          c.status === "in_progress" ? "in_progress" : c.status
                         }
                         onChange={(e) =>
                           handleStatusUpdate(c.id, e.target.value)
                         }
-                        className="text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none disabled:opacity-50"
+                        className={`text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none disabled:opacity-50 transition-colors ${
+                          c.status === "resolved"
+                            ? "text-green-600 border-green-200"
+                            : c.status === "rejected"
+                              ? "text-red-600 border-red-200"
+                              : c.status === "in_progress"
+                                ? "text-amber-600 border-amber-200"
+                                : "text-blue-600 border-blue-200"
+                        }`}
                       >
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="escalated">Escalated</option>
+                        <option
+                          value="pending"
+                          className="text-blue-600 font-bold"
+                        >
+                          Pending
+                        </option>
+                        <option
+                          value="in_progress"
+                          className="text-amber-600 font-bold"
+                        >
+                          In Progress
+                        </option>
+                        <option
+                          value="resolved"
+                          className="text-green-600 font-bold"
+                        >
+                          Resolved
+                        </option>
+                        <option
+                          value="rejected"
+                          className="text-red-600 font-bold"
+                        >
+                          Rejected
+                        </option>
+                        <option
+                          value="escalated"
+                          className="text-purple-600 font-bold"
+                        >
+                          Escalated
+                        </option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">

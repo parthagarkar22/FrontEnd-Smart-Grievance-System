@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchUserComplaints } from "../services/grievanceService";
+import { useNavigate } from "react-router-dom";
 // Graph Sathi import
 import {
   PieChart,
@@ -14,6 +15,7 @@ export default function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  
 
   useEffect(() => {
     loadData();
@@ -158,6 +160,7 @@ export default function MyComplaints() {
 
 /* 🔹 Reusable Grouping Component */
 function ComplaintGroup({ title, data, borderColor }) {
+  const navigate = useNavigate();
   if (data.length === 0) return null;
 
   return (
@@ -189,7 +192,28 @@ function ComplaintGroup({ title, data, borderColor }) {
                 {c.status}
               </span>
             </div>
+
             <StatusTimeline status={c.status} />
+
+            {/* ✅ NEW: Feedback Button - Only shows for Resolved Complaints */}
+            {c.status?.toLowerCase() === "resolved" && (
+              <div className="mt-6 pt-4 border-t border-slate-50 flex justify-end">
+                <button
+                  onClick={() =>
+                    navigate("/feedback", {
+                      state: {
+                        grievanceId: c.id,
+                        officerId: c.assigned_officer,
+                      },
+                    })
+                  }
+                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2"
+                >
+                  ⭐ Rate Our Service
+                </button>
+              </div>
+            )}
+
             {c.latitude && c.longitude && (
               <div className="mt-8 rounded-2xl overflow-hidden border border-slate-100 shadow-inner opacity-80 hover:opacity-100 transition-opacity">
                 <iframe
@@ -197,7 +221,11 @@ function ComplaintGroup({ title, data, borderColor }) {
                   width="100%"
                   height="120"
                   loading="lazy"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${c.longitude - 0.002}%2C${c.latitude - 0.002}%2C${c.longitude + 0.002}%2C${c.latitude + 0.002}&layer=mapnik&marker=${c.latitude}%2C${c.longitude}`}
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                    c.longitude - 0.002
+                  }%2C${c.latitude - 0.002}%2C${c.longitude + 0.002}%2C${
+                    c.latitude + 0.002
+                  }&layer=mapnik&marker=${c.latitude}%2C${c.longitude}`}
                 />
               </div>
             )}
@@ -207,7 +235,6 @@ function ComplaintGroup({ title, data, borderColor }) {
     </div>
   );
 }
-
 /* 🔹 Progress Tracking Component (Keep existing logic) */
 function StatusTimeline({ status }) {
   const steps = ["Submitted", "Assigned", "In Progress", "Resolved"];

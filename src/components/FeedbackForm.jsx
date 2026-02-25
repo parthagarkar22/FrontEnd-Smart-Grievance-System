@@ -1,18 +1,28 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { submitFeedback } from "../services/feedbackService";
 
-const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
+const FeedbackForm = ({ onSuccess }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { grievanceId, officerId } = location.state || {};
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // FeedbackForm.jsx मधील handleSubmit मधील हा भाग रिप्लेस कर:
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // ✅ Debug करण्यासाठी हा लॉग टाकून बघ की officerId मध्ये व्हॅल्यू येतेय का
-    console.log("Current Officer ID:", officerId);
+    // ✅ Debug करण्यासाठी लॉग
+    console.log(
+      "Received IDs from State - Grievance:",
+      grievanceId,
+      "Officer:",
+      officerId,
+    );
 
     const payload = {
       grievance: parseInt(grievanceId),
@@ -22,9 +32,11 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
       comment: comment.trim() || "Resolution satisfied.",
     };
 
-    // 🚨 जर ऑफिसर आयडी नसेल तर सबमिट करू नको
+    // 🚨 जर ऑफिसर आयडी नसेल तर सबमिट करण्याऐवजी मेसेज दाखवा
     if (!payload.officer) {
-      alert("Error: Officer information is missing. Cannot submit feedback.");
+      alert(
+        "Error: Officer information is missing. Please go back to My History and try again.",
+      );
       setLoading(false);
       return;
     }
@@ -32,7 +44,12 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
     try {
       await submitFeedback(payload);
       alert("Feedback submitted successfully!");
-      if (onSuccess) onSuccess();
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/user-dashboard"); // सबमिट झाल्यावर डॅशबोर्डवर पाठवा
+      }
     } catch (err) {
       const serverError = err.response?.data;
       if (serverError?.grievance) {
@@ -44,13 +61,14 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
       setLoading(false);
     }
   };
+
   return (
-    <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-xl max-w-md mx-auto">
+    <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-xl max-w-md mx-auto mt-10">
       <h3 className="text-xl font-black text-gray-800 mb-2 uppercase tracking-tight">
         Rate the Resolution
       </h3>
       <p className="text-gray-400 text-xs font-bold mb-6 uppercase">
-        Grievance ID: #{grievanceId}
+        Grievance ID: #{grievanceId || "N/A"}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -91,7 +109,7 @@ const FeedbackForm = ({ grievanceId, officerId, onSuccess }) => {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !grievanceId}
           className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm hover:bg-emerald-600 transition shadow-lg shadow-emerald-100 disabled:opacity-50 uppercase tracking-widest"
         >
           {loading ? "Processing..." : "Submit Experience"}
