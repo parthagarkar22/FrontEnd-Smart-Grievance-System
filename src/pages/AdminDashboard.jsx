@@ -267,7 +267,9 @@ export default function AdminDashboard() {
                           src={
                             c.image.startsWith("http")
                               ? c.image
-                              : `http://127.0.0.1:8000${c.image}`
+                              : c.image.startsWith("/")
+                                ? `http://127.0.0.1:8000${c.image}`
+                                : `http://127.0.0.1:8000/${c.image}`
                           }
                           alt="Evidence"
                           className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:opacity-80 border border-gray-200"
@@ -275,7 +277,9 @@ export default function AdminDashboard() {
                             setSelectedImg(
                               c.image.startsWith("http")
                                 ? c.image
-                                : `http://127.0.0.1:8000${c.image}`,
+                                : c.image.startsWith("/")
+                                  ? `http://127.0.0.1:8000${c.image}`
+                                  : `http://127.0.0.1:8000/${c.image}`,
                             )
                           }
                           onError={(e) => {
