@@ -264,7 +264,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       {c.image ? (
                         <img
-                          // ✅ बदल: इमेज पाथ पूर्ण करण्यासाठी http://127.0.0.1:8000 जोडा
+                          
                           src={
                             c.image.startsWith("http")
                               ? c.image
@@ -279,6 +279,10 @@ export default function AdminDashboard() {
                                 : `http://127.0.0.1:8000${c.image}`,
                             )
                           }
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/150?text=Error";
+                          }} 
                         />
                       ) : (
                         <span className="text-[10px] text-gray-300 italic">
