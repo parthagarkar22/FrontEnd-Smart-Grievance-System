@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           <span>📈</span> Department Performance Overview
         </h2>
         {/* ✅ FIX: Added a fixed height to the container to solve width(-1) error */}
-        <div className="h-80 w-full">
+        <div style={{ width: "100%", height: "350px", minHeight: "300px" }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={getDeptStats()}>
               <XAxis
