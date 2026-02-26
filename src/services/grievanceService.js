@@ -55,14 +55,14 @@ export const updateComplaintStatus = async (id, status) => {
 
 export const fetchAllFeedbacks = async () => {
   try {
-    const response = await API.get("feedback/");
+    const response = await API.get("feedback/admin/");
 
     console.log("Raw Feedback Response:", response.data);
 
-    // ३. जर डेटा 'results' मध्ये असेल तर तो घ्या, नसेल तर पूर्ण डेटा
     return response.data.results || response.data;
   } catch (error) {
-    console.error("Feedback Path Error:", error.response?.status);
+    console.error("Feedback Fetch Error Status:", error.response?.status);
+    console.error("Full Error Response:", error.response?.data);
     return [];
   }
 };

@@ -264,10 +264,21 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       {c.image ? (
                         <img
-                          src={c.image}
+                          // ✅ बदल: इमेज पाथ पूर्ण करण्यासाठी http://127.0.0.1:8000 जोडा
+                          src={
+                            c.image.startsWith("http")
+                              ? c.image
+                              : `http://127.0.0.1:8000${c.image}`
+                          }
                           alt="Evidence"
                           className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:opacity-80 border border-gray-200"
-                          onClick={() => setSelectedImg(c.image)}
+                          onClick={() =>
+                            setSelectedImg(
+                              c.image.startsWith("http")
+                                ? c.image
+                                : `http://127.0.0.1:8000${c.image}`,
+                            )
+                          }
                         />
                       ) : (
                         <span className="text-[10px] text-gray-300 italic">
