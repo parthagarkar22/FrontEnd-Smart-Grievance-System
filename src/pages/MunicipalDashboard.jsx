@@ -9,6 +9,8 @@ const MunicipalDashboard = () => {
   const { user } = useContext(AuthContext);
   const [complaints, setComplaints] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [selectedImg, setSelectedImg] = useState(null);
+
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -145,6 +147,7 @@ const MunicipalDashboard = () => {
               <tr>
                 <th className="p-5">ID</th>
                 <th className="p-5">Citizen & Exact Address</th>
+                <th className="p-5">Image</th>
                 <th className="p-5 text-center">Priority</th>
                 <th className="p-5">Description</th>
                 <th className="p-5 text-center">Status</th>
@@ -177,6 +180,41 @@ const MunicipalDashboard = () => {
                         📍 VIEW EXACT LOCATION
                       </a>
                     </td>
+
+                    <td className="px-6 py-4">
+                      {c.image ? (
+                        <img
+                          src={
+                            c.image.startsWith("http")
+                              ? c.image
+                              : c.image.startsWith("/")
+                                ? `http://127.0.0.1:8000${c.image}`
+                                : `http://127.0.0.1:8000/${c.image}`
+                          }
+                          alt="Evidence"
+                          className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:opacity-80 border border-gray-200"
+                          onClick={() =>
+                            setSelectedImg(
+                              c.image.startsWith("http")
+                                ? c.image
+                                : c.image.startsWith("/")
+                                  ? `http://127.0.0.1:8000${c.image}`
+                                  : `http://127.0.0.1:8000/${c.image}`,
+                            )
+                          }
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src =
+                              "https://placehold.co/150?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <span className="text-[10px] text-gray-300 italic">
+                          No Image
+                        </span>
+                      )}
+                    </td>
+
                     <td className="p-5 text-center">
                       <span
                         className={`px-2.5 py-1 rounded text-[9px] font-black uppercase border ${
@@ -284,6 +322,19 @@ const MunicipalDashboard = () => {
           </div>
         )}
       </div>
+      {selectedImg && (
+        <div
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-10 cursor-zoom-out"
+          onClick={() => setSelectedImg(null)}
+        >
+          <img
+            src={selectedImg}
+            className="max-w-full max-h-[90vh] rounded-2xl"
+            alt="Full View"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
