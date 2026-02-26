@@ -306,9 +306,9 @@ const ChatBot = () => {
         )}
       </button>
 
-      {/* Chat Window with Smooth Animations */}
+      {/* Chat Window - Normal Window Size */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 w-[380px] sm:w-[400px] h-[550px] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="absolute bottom-20 right-0 w-[400px] h-[600px] bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
           {/* Header with Gradient */}
           <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-4 text-white">
             <div className="flex items-center gap-3">
@@ -317,13 +317,13 @@ const ChatBot = () => {
                 <div className="w-3 h-3 bg-green-400 rounded-full absolute top-0 animate-ping opacity-75"></div>
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-sm flex items-center gap-2">
+                <h3 className="font-bold text-base flex items-center gap-2">
                   Smart Grievance Assistant
-                  <span className="bg-indigo-500 px-2 py-0.5 rounded-full text-[10px]">
+                  <span className="bg-indigo-500 px-2 py-0.5 rounded-full text-xs">
                     Beta
                   </span>
                 </h3>
-                <p className="text-[10px] text-indigo-100">
+                <p className="text-xs text-indigo-100">
                   Ask me anything about the system
                 </p>
               </div>
@@ -331,26 +331,28 @@ const ChatBot = () => {
                 onClick={() => setIsOpen(false)}
                 className="hover:bg-indigo-500 p-1 rounded-full transition-colors"
               >
-                <span className="text-sm">🗕</span>
+                <span className="text-base">🗕</span>
               </button>
             </div>
           </div>
 
           {/* Chat Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col gap-3 scroll-smooth">
+          <div className="flex-1 p-6 overflow-y-auto bg-gray-50 flex flex-col gap-4 scroll-smooth">
             {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex ${msg.isBot ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2 duration-300`}
               >
                 <div
-                  className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${
+                  className={`max-w-[80%] px-5 py-3.5 rounded-2xl text-base ${
                     msg.isBot
                       ? "bg-white text-gray-700 shadow-sm border border-gray-100 rounded-tl-none"
                       : "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-tr-none"
                   }`}
                 >
-                  <div className="whitespace-pre-line">{msg.text}</div>
+                  <div className="whitespace-pre-line leading-relaxed">
+                    {msg.text}
+                  </div>
 
                   {/* Quick Reply Buttons */}
                   {msg.isBot &&
@@ -361,7 +363,7 @@ const ChatBot = () => {
                           <button
                             key={idx}
                             onClick={() => handleQuickReply(reply)}
-                            className="text-[11px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-all duration-200 hover:scale-105"
+                            className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-4 py-2 rounded-full hover:bg-indigo-100 transition-all duration-200 hover:scale-105"
                           >
                             {reply}
                           </button>
@@ -375,18 +377,18 @@ const ChatBot = () => {
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="bg-white text-gray-700 shadow-sm border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3">
-                  <div className="flex gap-1">
+                <div className="bg-white text-gray-700 shadow-sm border border-gray-100 rounded-2xl rounded-tl-none px-5 py-4">
+                  <div className="flex gap-1.5">
                     <span
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     ></span>
                     <span
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     ></span>
                     <span
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      className="w-2.5 h-2.5 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     ></span>
                   </div>
@@ -396,7 +398,7 @@ const ChatBot = () => {
 
             {/* Welcome Suggestions */}
             {messages.length === 1 && showSuggestions && (
-              <div className="flex flex-wrap gap-2 mt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="flex flex-wrap gap-2 mt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 {[
                   "What is Smart Grievance?",
                   "How to file complaint?",
@@ -408,7 +410,7 @@ const ChatBot = () => {
                   <button
                     key={action}
                     onClick={() => handleSend(null, action)}
-                    className="text-[11px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-3 py-1.5 rounded-full hover:bg-indigo-100 transition-all duration-200 hover:scale-105"
+                    className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-4 py-2 rounded-full hover:bg-indigo-100 transition-all duration-200 hover:scale-105"
                   >
                     {action}
                   </button>
@@ -421,24 +423,24 @@ const ChatBot = () => {
           {/* Input Area with Microphone Icon */}
           <form
             onSubmit={handleSend}
-            className="p-3 bg-white border-t flex items-center gap-2"
+            className="p-4 bg-white border-t flex items-center gap-2"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question..."
-              className="flex-1 bg-gray-100 border-none rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              className="flex-1 bg-gray-100 border-none rounded-lg px-5 py-3 text-base focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
             />
             <button
               type="submit"
-              className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-2.5 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 hover:scale-105 shadow-md"
+              className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-3 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 hover:scale-105 shadow-md"
               disabled={!input.trim()}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -452,13 +454,13 @@ const ChatBot = () => {
             </button>
             <button
               type="button"
-              className="bg-gray-100 text-gray-600 p-2.5 rounded-lg hover:bg-gray-200 transition-all duration-200 hover:scale-105"
+              className="bg-gray-100 text-gray-600 p-3 rounded-lg hover:bg-gray-200 transition-all duration-200 hover:scale-105"
               title="Voice input coming soon"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -475,8 +477,8 @@ const ChatBot = () => {
           </form>
 
           {/* Footer Hint */}
-          <div className="bg-gray-50 px-3 py-1.5 border-t border-gray-100">
-            <p className="text-[10px] text-gray-500 text-center">
+          <div className="bg-gray-50 px-4 py-2 border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center">
               Smart Grievance System • AI Assistant • 24/7 Support
             </p>
           </div>
