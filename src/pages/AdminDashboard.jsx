@@ -162,7 +162,7 @@ export default function AdminDashboard() {
         <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <span>📈</span> Department Performance Overview
         </h2>
-        <div style={{ width: "100%", height: "350px", minHeight: "300px" }}>
+        <div style={{ width: "100%", height: "350px", minHeight: "350px" }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={getDeptStats()}>
               <XAxis
@@ -264,7 +264,6 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4">
                       {c.image ? (
                         <img
-                          
                           src={
                             c.image.startsWith("http")
                               ? c.image
@@ -280,9 +279,10 @@ export default function AdminDashboard() {
                             )
                           }
                           onError={(e) => {
+                            e.target.onerror = null;
                             e.target.src =
-                              "https://via.placeholder.com/150?text=Error";
-                          }} 
+                              "https://placehold.co/150?text=No+Image";
+                          }}
                         />
                       ) : (
                         <span className="text-[10px] text-gray-300 italic">
