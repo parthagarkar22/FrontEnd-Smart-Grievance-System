@@ -32,11 +32,16 @@ export default function MyComplaints() {
     }
   };
 
-  // --- Filtering & Grouping Logic ---
-  const filtered = complaints.filter((c) =>
-    (c.description || "").toLowerCase().includes(search.toLowerCase()),
-  );
+  // --- Filtering & Sorting Logic ---
+  const filtered = complaints
+    .filter((c) =>
+      (c.description || "").toLowerCase().includes(search.toLowerCase()),
+    )
+    // Sort by date: Newest first
+    // Replace 'created_at' with your actual date field name (e.g., 'date' or 'timestamp')
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
+  // --- Grouping Logic ---
   const grouped = {
     pending: filtered.filter((c) =>
       ["pending", "submitted"].includes(c.status?.toLowerCase()),
@@ -106,19 +111,6 @@ export default function MyComplaints() {
           data={grouped.rejected}
           borderColor="border-l-red-500"
         />
-      </div>
-
-      {/* ✅ २. ॲनालिटिक्स बटण आता 'return' च्या आत आणि तळाशी आहे */}
-      <div className="mt-20 py-10 border-t border-slate-200 flex justify-center">
-        <button
-          onClick={() => navigate("/analytics", { state: { chartData } })}
-          className="group relative bg-[#0F2A44] text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-4"
-        >
-          <span>📊 View Detailed Analytics Report</span>
-          <span className="group-hover:translate-x-2 transition-transform">
-            →
-          </span>
-        </button>
       </div>
     </div>
   );
@@ -202,54 +194,102 @@ function ComplaintGroup({ title, data, borderColor }) {
     </div>
   );
 }
+
 /* 🔹 Progress Tracking Component (Keep existing logic) */
 function StatusTimeline({ status }) {
-  const steps = ["Submitted", "Assigned", "In Progress", "Resolved"];
+  const steps = ["Sent", "Assigned", "Fixing", "Resolved"];
   const currentStatus = status?.toLowerCase();
+
+  // Mapping logic
   let activeIndex = 0;
   if (["pending", "submitted"].includes(currentStatus)) activeIndex = 1;
-  if (["in progress", "in_progress", "assigned"].includes(currentStatus))
-    activeIndex = 2;
-  if (currentStatus === "resolved") activeIndex = 3;
+  if (["assigned", "in progress", "in_progress"].includes(currentStatus))
+    activeIndex = 3; // Jump to 3 for visual impact
+  if (currentStatus === "resolved") activeIndex = 4;
 
+  // ❌ REJECTED STATE
   if (currentStatus === "rejected") {
     return (
-      <div className="mt-4 p-3 bg-red-50 rounded-2xl flex items-center gap-3 border border-red-100">
-        <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold">
-          !
+      <div className="mt-6 p-4 bg-red-50 rounded-2xl flex items-center gap-3 border border-red-100 animate-pulse">
+        <div className="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center text-xl shadow-lg shadow-red-200">
+          ✕
         </div>
-        <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight">
-          Complaint Rejected. Contact office for details.
-        </p>
+        <div>
+          <p className="text-[11px] text-red-600 font-black uppercase tracking-widest">
+            Action Required
+          </p>
+          <p className="text-xs text-red-500 font-medium">
+            This report was rejected. Tap for details.
+          </p>
+        </div>
       </div>
     );
   }
 
+  // ✅ RESOLVED / COMPLETED STATE
+  if (currentStatus === "resolved") {
+    return (
+      <div className="mt-6 p-5 bg-green-50 rounded-[2rem] border-2 border-dashed border-green-200 flex flex-col items-center text-center gap-2">
+        <div className="w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center text-2xl shadow-lg shadow-green-200 animate-bounce">
+          ✓
+        </div>
+        <div>
+          <p className="text-sm font-bold text-green-700">
+            Issue Resolved Successfully!
+          </p>
+          <p className="text-[10px] text-green-600 uppercase font-black tracking-widest opacity-70">
+            Case Closed
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ⏳ ACTIVE TRACKING STATE
   return (
-    <div className="mt-8 mb-4 px-2">
-      <div className="flex items-center justify-between relative">
+    <div className="mt-8 px-2">
+      <div className="flex justify-between items-center relative">
+        {/* Background Gray Line */}
+        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -translate-y-1/2 z-0" />
+
+        {/* Active Blue Progress Line */}
+        <div
+          className="absolute top-1/2 left-0 h-[2px] bg-blue-500 -translate-y-1/2 z-0 transition-all duration-700"
+          style={{ width: `${(activeIndex - 1) * 33.33}%` }}
+        />
+
         {steps.map((step, index) => {
-          const isActive = index <= activeIndex;
+          const stepNum = index + 1;
+          const isActive = stepNum <= activeIndex;
+          const isCurrent = stepNum === activeIndex;
+
           return (
             <div
               key={step}
-              className="flex flex-col items-center flex-1 relative"
+              className="relative z-10 flex flex-col items-center"
             >
               <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold z-10 transition-all ${isActive ? "bg-blue-600 text-white shadow-lg ring-4 ring-blue-50" : "bg-slate-100 text-slate-300"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
+                  isCurrent
+                    ? "bg-blue-600 text-white ring-4 ring-blue-100 scale-110 shadow-lg"
+                    : isActive
+                      ? "bg-blue-500 text-white"
+                      : "bg-white border-2 border-slate-200 text-slate-300"
+                }`}
               >
-                {index < activeIndex ? "✓" : index}
+                {isActive && !isCurrent ? (
+                  <span className="text-xs">✓</span>
+                ) : (
+                  <span className="text-[10px] font-bold">{stepNum}</span>
+                )}
               </div>
-              <span
-                className={`mt-2 text-[8px] font-black uppercase tracking-tighter ${isActive ? "text-slate-700" : "text-slate-300"}`}
+              <p
+                className={`absolute -bottom-6 text-[9px] font-black uppercase tracking-tighter whitespace-nowrap ${
+                  isActive ? "text-blue-600" : "text-slate-400"
+                }`}
               >
                 {step}
-              </span>
-              {index !== steps.length - 1 && (
-                <div
-                  className={`absolute top-3 left-1/2 w-full h-[2px] -z-0 ${index < activeIndex ? "bg-blue-600" : "bg-slate-100"}`}
-                />
-              )}
+              </p>
             </div>
           );
         })}

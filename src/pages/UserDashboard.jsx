@@ -119,70 +119,94 @@ const UserDashboard = () => {
             />
           </div>
 
-          {/* ✅ २. Analytics Button - Stats Cards च्या खाली */}
-          <div className="fixed bottom-6 left-0 right-0 flex justify-center px-6 z-50">
-            <button
-              onClick={() => navigate("/analytics", { state: { chartData } })}
-              className="w-full max-w-md bg-slate-900/90 backdrop-blur-md text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl border border-white/10"
+          {/* --- Main Action Grid --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-0">
+            {/* Card 1: Track Status */}
+            <Link
+              to="/my-complaints"
+              className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
-              📊 Open Analytics Report →
-            </button>
-          </div>
+              {/* Subtle Background Decoration */}
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-blue-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* --- Action Card 1: Track Status --- */}
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm group hover:shadow-md transition-all">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl">
+              <div className="relative flex flex-col h-full justify-between">
+                <div className="space-y-5">
+                  <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-blue-100 group-hover:scale-110 transition-transform">
                     📋
                   </div>
-                  <h2 className="text-xl font-bold text-slate-800">
-                    Track Status
-                  </h2>
-                  <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
-                    View detailed history of all your complaints and check
-                    real-time responses from officers.
-                  </p>
-                  <Link
-                    to="/my-complaints"
-                    className="inline-block text-blue-600 font-black text-xs uppercase tracking-widest hover:underline"
-                  >
-                    View History →
-                  </Link>
+
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                      Track Status
+                    </h2>
+                    <p className="text-slate-500 mt-2 text-sm leading-relaxed">
+                      View detailed history of all your complaints and check
+                      real-time responses from officers.
+                    </p>
+                  </div>
                 </div>
-                <div className="hidden sm:block opacity-10 text-8xl group-hover:opacity-20 transition-opacity">
-                  📋
+
+                <div className="mt-8 flex items-center text-blue-600 font-black text-[10px] uppercase tracking-[0.15em] group-hover:gap-3 transition-all">
+                  View History <span className="text-lg leading-none">→</span>
                 </div>
               </div>
-            </div>
+            </Link>
 
-            {/* --- Action Card 2: Local Assistance --- */}
-            <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm group hover:shadow-md transition-all">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <div className="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-2xl">
+            {/* Card 2: Local Assistance */}
+            <Link
+              to="/complaint"
+              className="group relative bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-red-500/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+            >
+              {/* Subtle Background Decoration */}
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-red-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative flex flex-col h-full justify-between">
+                <div className="space-y-5">
+                  <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-red-100 group-hover:scale-110 transition-transform">
                     📢
                   </div>
-                  <h2 className="text-xl font-bold text-slate-800">
-                    Local Assistance
-                  </h2>
-                  <p className="text-slate-500 text-sm leading-relaxed max-w-sm">
-                    Report issues like street lights, garbage or water leakage
-                    directly to the department.
-                  </p>
-                  <Link
-                    to="/complaint"
-                    className="inline-block text-red-500 font-black text-xs uppercase tracking-widest hover:underline"
-                  >
-                    Report Issue →
-                  </Link>
+
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">
+                      Local Assistance
+                    </h2>
+                    <p className="text-slate-500 mt-2 text-sm leading-relaxed">
+                      Report issues like street lights, garbage or water leakage
+                      directly to the department.
+                    </p>
+                  </div>
                 </div>
-                <div className="hidden sm:block opacity-10 text-8xl group-hover:opacity-20 transition-opacity">
-                  📢
+
+                <div className="mt-8 flex items-center text-red-500 font-black text-[10px] uppercase tracking-[0.15em] group-hover:gap-3 transition-all">
+                  Report Issue <span className="text-lg leading-none">→</span>
                 </div>
               </div>
-            </div>
+            </Link>
+          </div>
+
+          {/* ✅ Analytics Button positioned below the grid */}
+          <div className="mt-10 mb-12 flex justify-center px-4">
+            <button
+              onClick={() => navigate("/analytics", { state: { chartData } })}
+              className="w-full max-w-lg bg-slate-900 text-white py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 active:scale-95"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              Open Analytics Report
+            </button>
           </div>
         </div>
       </div>

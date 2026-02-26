@@ -183,45 +183,89 @@ const ComplaintForm = () => {
 
           {/* Detailed Description */}
           <div className="group relative">
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                Description
-              </label>
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block">
+              Description
+            </label>
 
-              <button
-                type="button"
-                onClick={startListening}
-                className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full transition-all ${
-                  listening
-                    ? "bg-red-100 text-red-600 animate-pulse"
-                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                }`}
-              >
-                🎤 {listening ? "Listening..." : "Speak"}
-              </button>
+            <div className="relative">
+              <textarea
+                placeholder="Describe what you see..."
+                required
+                value={formData.description}
+                className="w-full p-4 pb-12 bg-slate-50 border border-slate-200 rounded-2xl h-40 outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 resize-none"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    description: e.target.value,
+                  })
+                }
+              />
+
+              {/* WhatsApp Style Mic Button */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                {transcript && !listening && (
+                  <button
+                    type="button"
+                    onClick={handleVoiceFill}
+                    className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-lg font-bold uppercase animate-bounce"
+                  >
+                    Click to Apply Text
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={
+                    listening ? SpeechRecognition.stopListening : startListening
+                  }
+                  className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-90 ${
+                    listening
+                      ? "bg-red-500 animate-pulse ring-4 ring-red-100"
+                      : "bg-[#25D366] hover:bg-[#128C7E] shadow-green-200"
+                  }`}
+                >
+                  {listening ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="6" y="4" width="4" height="16"></rect>
+                      <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="23"></line>
+                      <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
-            <textarea
-              placeholder="Describe what you see..."
-              required
-              value={formData.description}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder:text-slate-400 resize-none"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  description: e.target.value,
-                })
-              }
-            />
-
-            {transcript && (
-              <button
-                type="button"
-                onClick={handleVoiceFill}
-                className="text-xs text-green-600 mt-2 hover:underline"
-              >
-                Use Voice Text
-              </button>
+            {/* Status Indicator */}
+            {listening && (
+              <p className="text-[10px] text-red-500 font-bold mt-2 ml-2 uppercase tracking-tighter">
+                ● Recording Voice...
+              </p>
             )}
           </div>
 

@@ -21,8 +21,11 @@ export default function AdminDashboard() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
-  const [sortByStatus, setSortByStatus] = useState("None"); // ✨ Sorting State
+  const [sortByStatus, setSortByStatus] = useState("None");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ १. इमेज स्टेट डॅशबोर्ड फंक्शनच्या आत हलवली
+  const [selectedImg, setSelectedImg] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -47,7 +50,6 @@ export default function AdminDashboard() {
     try {
       let statusToBackend = newStatus.toLowerCase();
       if (statusToBackend === "in progress") statusToBackend = "in_progress";
-
       await updateComplaintStatus(id, statusToBackend);
       setComplaints((prev) =>
         prev.map((c) => (c.id === id ? { ...c, status: statusToBackend } : c)),
@@ -81,20 +83,15 @@ export default function AdminDashboard() {
       .length,
   };
 
-  // stats data fetch katoy ithe
   const getDeptStats = () => {
     const deptMap = {};
-
     const officialDepts = ["Light", "Road", "Sewage", "Water", "Garbage"];
-
     officialDepts.forEach((d) => (deptMap[d] = 0));
-
     complaints.forEach((c) => {
       if (officialDepts.includes(c.department)) {
         deptMap[c.department] += 1;
       }
     });
-
     return Object.keys(deptMap).map((key) => ({
       name: key,
       count: deptMap[key],
@@ -113,12 +110,10 @@ export default function AdminDashboard() {
       );
     })
     .sort((a, b) => {
-      // १. स्टेटस नुसार सॉर्टिंग (User Requirement)
       if (sortByStatus !== "None") {
         if (a.status === sortByStatus && b.status !== sortByStatus) return -1;
         if (a.status !== sortByStatus && b.status === sortByStatus) return 1;
       }
-      // २. प्रायोरिटी नुसार मूळ सॉर्टिंग
       const weight = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
       return (weight[b.priority] || 0) - (weight[a.priority] || 0);
     });
@@ -131,12 +126,11 @@ export default function AdminDashboard() {
     );
 
   return (
-    <div className="space-y-10 p-6 bg-[#F8FAFC] min-h-screen font-sans">
+    <div className="space-y-10 p-6 bg-[#F8FAFC] min-h-screen font-sans relative">
       <h1 className="text-2xl font-black text-gray-800 tracking-tight uppercase">
         SUPER ADMIN DASHBOARD
       </h1>
 
-      {/* --- Section 1: Stats Cards --- */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatBox
           title="Total Reports"
@@ -164,12 +158,10 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* --- ✨ Section 2: Department-wise Statistics --- */}
       <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
           <span>📈</span> Department Performance Overview
         </h2>
-        {/* ✅ FIX: Added a fixed height to the container to solve width(-1) error */}
         <div style={{ width: "100%", height: "350px", minHeight: "300px" }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={getDeptStats()}>
@@ -204,7 +196,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* --- Section 3: Active Grievances Table --- */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -217,9 +208,6 @@ export default function AdminDashboard() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-
-            {/* ✨ Status Sorting Option */}
-
             <select
               className="border rounded-xl text-sm px-3 py-2 font-bold bg-white outline-none shadow-sm"
               value={filter}
@@ -242,6 +230,7 @@ export default function AdminDashboard() {
                 <tr>
                   <th className="px-6 py-5">ID</th>
                   <th className="px-6 py-5">Citizen & Location</th>
+                  <th className="px-6 py-5">Image</th>
                   <th className="px-6 py-5">Department</th>
                   <th className="px-6 py-5 text-center">Priority</th>
                   <th className="p-5">Description</th>
@@ -273,46 +262,40 @@ export default function AdminDashboard() {
                       </a>
                     </td>
                     <td className="px-6 py-4">
+                      {c.image ? (
+                        <img
+                          src={c.image}
+                          alt="Evidence"
+                          className="w-12 h-12 rounded-lg object-cover cursor-pointer hover:opacity-80 border border-gray-200"
+                          onClick={() => setSelectedImg(c.image)}
+                        />
+                      ) : (
+                        <span className="text-[10px] text-gray-300 italic">
+                          No Image
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
                       <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase border border-blue-100">
                         {c.department || "General"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${
-                          c.priority === "CRITICAL" || c.priority === "HIGH"
-                            ? "bg-red-50 text-red-600 border-red-100 animate-pulse"
-                            : c.priority === "MEDIUM"
-                              ? "bg-amber-50 text-amber-600 border-amber-100"
-                              : c.priority === "LOW"
-                                ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                                : "bg-gray-50 text-gray-500 border-gray-100"
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[9px] font-black border uppercase ${c.priority === "CRITICAL" || c.priority === "HIGH" ? "bg-red-50 text-red-600 border-red-100 animate-pulse" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}
                       >
                         {c.priority}
                       </span>
                     </td>
-
                     <td
                       className="p-5 text-gray-600 text-xs max-w-xs truncate"
                       title={c.description}
                     >
                       {c.description || "No details provided"}
                     </td>
-
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border transition-all ${
-                          c.status?.includes("resolved")
-                            ? "bg-green-50 text-green-700 border-green-100"
-                            : c.status?.includes("rejected")
-                              ? "bg-red-50 text-red-700 border-red-100"
-                              : c.status?.includes("escalated")
-                                ? "bg-purple-50 text-purple-700 border-purple-100"
-                                : c.status?.includes("in_progress")
-                                  ? "bg-amber-50 text-amber-700 border-amber-100"
-                                  : "bg-blue-50 text-blue-700 border-blue-100" // For 'pending'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border transition-all ${c.status?.includes("resolved") ? "bg-green-50 text-green-700 border-green-100" : "bg-blue-50 text-blue-700 border-blue-100"}`}
                       >
                         {c.status?.replace("_", " ")}
                       </span>
@@ -326,46 +309,13 @@ export default function AdminDashboard() {
                         onChange={(e) =>
                           handleStatusUpdate(c.id, e.target.value)
                         }
-                        className={`text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none disabled:opacity-50 transition-colors ${
-                          c.status === "resolved"
-                            ? "text-green-600 border-green-200"
-                            : c.status === "rejected"
-                              ? "text-red-600 border-red-200"
-                              : c.status === "in_progress"
-                                ? "text-amber-600 border-amber-200"
-                                : "text-blue-600 border-blue-200"
-                        }`}
+                        className="text-[11px] font-bold border rounded-lg p-1.5 bg-white outline-none disabled:opacity-50"
                       >
-                        <option
-                          value="pending"
-                          className="text-blue-600 font-bold"
-                        >
-                          Pending
-                        </option>
-                        <option
-                          value="in_progress"
-                          className="text-amber-600 font-bold"
-                        >
-                          In Progress
-                        </option>
-                        <option
-                          value="resolved"
-                          className="text-green-600 font-bold"
-                        >
-                          Resolved
-                        </option>
-                        <option
-                          value="rejected"
-                          className="text-red-600 font-bold"
-                        >
-                          Rejected
-                        </option>
-                        <option
-                          value="escalated"
-                          className="text-purple-600 font-bold"
-                        >
-                          Escalated
-                        </option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="escalated">Escalated</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -384,10 +334,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* --- Section 4: Citizen Feedback & Reviews Section --- */}
       <div className="pt-10 border-t border-gray-200">
         <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-          <span>⭐</span> Citizen Feedbacks & Service Reviews
+          <span>⭐</span> Citizen Feedbacks
         </h2>
         {feedbacks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -403,7 +352,7 @@ export default function AdminDashboard() {
                   <p className="text-[10px] font-black text-blue-500 uppercase mb-1">
                     ID: #{f.grievance}
                   </p>
-                  <p className="text-sm text-gray-700  font-medium italic">
+                  <p className="text-sm text-gray-700 font-medium italic">
                     "{f.comment || "No comments."}"
                   </p>
                 </div>
@@ -429,10 +378,29 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* ✅ २. इमेज ओव्हरले (Modal) - हा मुख्य return च्या शेवटी हलवला */}
+      {selectedImg && (
+        <div
+          className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-10 backdrop-blur-md cursor-zoom-out"
+          onClick={() => setSelectedImg(null)}
+        >
+          <button className="absolute top-10 right-10 text-white text-4xl font-black">
+            ×
+          </button>
+          <img
+            src={selectedImg}
+            className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl animate-in zoom-in duration-300 object-contain"
+            alt="Full View"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
+// ✅ ३. StatBox कॉम्पोनंटला बाहेर काढले आणि क्लीन केले
 function StatBox({ title, value, icon, color }) {
   const styles = {
     blue: "bg-blue-600",
