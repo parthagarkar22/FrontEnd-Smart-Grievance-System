@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const SubmitGrievance = () => {
   const navigate = useNavigate();
@@ -44,10 +45,7 @@ const SubmitGrievance = () => {
 
     try {
       // Path: router.register(r'citizen', GrievanceViewSet)
-      await axios.post(
-        "http://127.0.0.1:8000/api/grievances/citizen/",
-        payload,
-      );
+      await axios.post(`${API_BASE_URL}grievances/citizen/`, payload);
       alert("Complaint Registered Successfully!");
       navigate("/user-dashboard");
     } catch (error) {

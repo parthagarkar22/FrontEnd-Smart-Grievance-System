@@ -52,7 +52,7 @@ export default function ViewFeedbacks() {
         <div>
           <h2 className="text-3xl font-black text-gray-800 uppercase tracking-tight">
             {isAdmin
-              ? "System-Wide Feedback Audit"
+              ? "System-Wise Feedback Audit"
               : `${userDept} Performance Reviews`}
           </h2>
           <p className="text-slate-500 text-sm font-medium">

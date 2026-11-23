@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import AlertTicker from "../components/AlertTicker";
 import autoTable from "jspdf-autotable"; // 🆕 Added for government style report
+import { getMediaUrl } from "../config";
 import {
   BarChart,
   Bar,
@@ -76,8 +77,7 @@ export default function AdminDashboard() {
   const getFullImgUrl = (path) => {
     if (!path)
       return "https://via.placeholder.com/800x600?text=No+Image+Available";
-    if (path.startsWith("http")) return path;
-    return `http://127.0.0.1:8000${path}`;
+    return getMediaUrl(path);
   };
 
   useEffect(() => {

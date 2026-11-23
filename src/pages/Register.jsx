@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const Register = () => {
     if (!validateForm()) return;
 
     try {
-      await axios.post("http://127.0.0.1:8000/api/auth/register/", formData);
+      await axios.post(`${API_BASE_URL}auth/register/`, formData);
       alert("Registration successful! Please login.");
       navigate("/login");
     } catch (err) {

@@ -3,6 +3,7 @@ import { fetchUserComplaints } from "../services/grievanceService";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import SocialShare from "../components/SocialShare"; // Professional Integration
+import { getMediaUrl } from "../config";
 
 export default function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
@@ -12,11 +13,7 @@ export default function MyComplaints() {
   const navigate = useNavigate();
 
   // ✨ Helper to handle nested image paths from backend
-  const getFullImgUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-    return `http://127.0.0.1:8000${path}`;
-  };
+  const getFullImgUrl = (path) => getMediaUrl(path);
 
   // ✨ Advanced Helper: Image URL to Base64 for PDF
   const getBase64ImageFromURL = (url) => {

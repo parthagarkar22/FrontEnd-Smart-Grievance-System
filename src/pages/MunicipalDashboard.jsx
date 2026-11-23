@@ -6,6 +6,7 @@ import {
 } from "../services/grievanceService";
 import API from "../services/api";
 import GrievanceMap from "../components/GrievanceMap"; // Added Map Component
+import { getMediaUrl } from "../config";
 
 const MunicipalDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -45,9 +46,7 @@ const MunicipalDashboard = () => {
   const getFullImgUrl = (path) => {
     if (!path)
       return "https://via.placeholder.com/800x600?text=No+Image+Available";
-    if (path.startsWith("http")) return path;
-    // Prefix backend host to relative paths
-    return `http://127.0.0.1:8000${path.startsWith("/") ? "" : "/"}${path}`;
+    return getMediaUrl(path);
   };
 
   // ✅ Status-wise Filtering Logic
